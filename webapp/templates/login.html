@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Login Page{% endblock %}
+
+{% block links %}
+<link href="{{ url_for('static', filename='css/signup-login.css') }}" rel="stylesheet"/>
+{% endblock %} 
+
+{% block content %}
+
+<div class="box">
+    <h1>Login Here</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {{form.hidden_tag()}}
+
+        <p>{{form.email.label}}</p>
+        {{form.email()}}
+        {% for error in form.email.errors%}
+        <div class="validation-error-msg">{{error}}</div>
+        {% endfor %}
+
+        <p>{{form.password.label}}</p>
+        {{form.password()}}
+        {% for error in form.password.errors%}
+        <div class="validation-error-msg">{{error}}</div>
+        {% endfor %}
+
+        {{form.submit()}}
+
+        <a href="{{url_for('signup')}}" id="signup-link">Don't have an account? Click the link to Sign up </a>
+    </form>
+</div>
+{% endblock %}

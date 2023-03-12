@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Document</title>
+
+    <!-- Line Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" integrity="sha512-vebUliqxrVkBy3gucMhClmyQP9On/HAWQdKDXRaAlb/FKuTbxkjPKUyqVOxAcGwFDka79eTF+YXwfke1h3/wfg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Fontawesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Jquery CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" integrity="sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- CSS file for dashboard base -->
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet" />
+
+</head>
+<body>
+    
+    <input type="checkbox" id="nav-toggle">
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <h1><span class="lab la-accusoft"></span><span>CreditX</span></h1>
+    </div>
+    <div class="sidebar-menu">
+        <ul>
+            <li>
+                <a href="{{url_for('dashboard_home')}}" class="active" id="dashboard"><span class="las la-grip-horizontal"></span>
+                    <span>Dashboard</span></a>
+            </li>
+            <li>
+                <a href="{{url_for('dashboard_fill_credit_details')}}" id="fill-credit-details"><span class="lab la-wpforms"></span>
+                    <span>Fill Credit Details</span></a>
+            </li>
+            <li>
+                <a href="{{url_for('home')}}" id="home"><span class="las la-home"></span>
+                    <span>Home</span></a>
+            </li>
+            <li>
+                <form action="{{url_for('logout')}}" method="POST" id="logout">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <a href="javascript:{}" onclick="document.getElementById('logout').submit();"><span
+                            class="las la-share-square"></span>
+                        <span>Logout</span></a>
+                </form>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="main-content">
+    <header>
+        <h1>
+            <label for="nav-toggle">
+                <span class="las la-bars"></span>
+            </label>
+            <span id="page">Dashboard</span>
+        </h1>
+
+        <div class="user-wrapper">
+            <span class="las la-user" id="user"></span>
+            <div>
+                {%if current_user.is_authenticated%}
+                <h4 id="emailid">{{current_user.email}}</h4>
+                <small>User</small>
+                {%endif%}
+
+            </div>
+        </div>
+    </header>
+
+    {%block content%}{%endblock%}
+
+</div>
+
+</body>
+</html>
+
+
+
+

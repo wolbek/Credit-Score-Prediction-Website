@@ -1,0 +1,109 @@
+{% extends 'base.html' %} 
+
+{% block title %}Home Page{% endblock %} 
+
+{% block links %}
+<link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet"/>
+{% endblock %} 
+
+{% block content %}
+
+<div id="banner">
+  <div id="banner-overlay">
+    <div id="banner-content">
+      <div id="banner-content-left-panel">
+        <h4>It’s easy and free to see where you stand</h4>
+        <h1>Check your credit score</h1>
+        <p>
+          Checking your credit history and credit scores can help you better
+          understand your current credit position. Regularly checking your
+          credit reports can help you be more aware of what lenders may see.
+        </p>
+        <a href="{{url_for('dashboard_home')}}" id="get-score">Get Score</a>
+        <a href="#main" id="about">About</a>
+      </div>
+      <div id="banner-content-right-panel">
+        <img
+          src="{{ url_for('static', filename='images/credit-score-wheel.png') }}"
+          width="400px"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="main">
+  <h2>Learn, Plan, Protect. All in one place. Here's how.</h2>
+
+  <div class="item">
+    <div class="block-content">
+      <div class="block-content-left-panel">
+        <div class="image-overlay">
+          <img
+            src="{{ url_for('static', filename='images/credit-score-home-image-1.jpg') }}"
+            width="400px"
+          />
+        </div>
+      </div>
+      <div class="block-content-right-panel">
+        <h3>What is credit score?</h3>
+        <p>
+          A credit score is a number from 300 to 850 that rates a consumer’s
+          creditworthiness. The higher the score, the better a borrower looks to
+          potential lenders. A credit score is based on credit history: - number
+          of open accounts total levels of debt repayment history, and other
+          factors.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="block-content">
+      <div class="block-content-left-panel">
+        <h3>Why you should calculate it?</h3>
+        <p>
+          Companies use credit scores to make decisions on whether to offer you
+          a mortgage, credit card, auto loan, and other credit products, as well
+          as for tenant screening and insurance. They are also used to determine
+          the interest rate and credit limit you receive. Having a good credit
+          score gives you leverage while applying for a loan as it assures the
+          lender of your creditworthiness.
+        </p>
+      </div>
+      <div class="block-content-right-panel">
+        <div class="image-overlay">
+          <img
+            src="{{ url_for('static', filename='images/credit-score-home-image-2.jpg') }}"
+            width="400px"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="block-content">
+        <div class="block-content-left-panel">
+          <div class="image-overlay">
+            <img
+              src="{{ url_for('static', filename='images/credit-score-home-image-3.jpg') }}"
+              width="400px"
+            />
+          </div>
+        </div>
+        <div class="block-content-right-panel">
+          <h3>What can damage your credit score?</h3>
+          <p>
+            Making a late payment, having a high debt to credit utilization ratio, applying for a lot of credit at once,  closing a credit card account or stopping your credit-related activities for an extended period can damange your credit score.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer">
+    <p>Copyright @ CreditX</p>
+</div>
+
+{% endblock %}

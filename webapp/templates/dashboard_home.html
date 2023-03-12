@@ -1,0 +1,183 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}User Dashboard Page{% endblock %}
+
+{% block links %}
+<link href="{{ url_for('static', filename='css/dashboard_home.css') }}" rel="stylesheet"/>
+{% endblock %} 
+
+{% block content %}
+
+<main id="main">
+    <div class="recent-grid">
+        <div id="input-wrapper">
+            <h2>Your credit details</h2>
+            <table id="credit-details-table">
+                <thead> 
+                    <tr>
+                        <th>Sr. no.</th>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>           
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Grade</td>
+                        <td>A</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Home ownership</td>
+                        <td>Mortgage</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Address state</td>
+                        <td>KS_SC_CO_VT_AK_MS</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Verification status</td>
+                        <td>Source Verified</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Purpose</td>
+                        <td>Debt consolidation</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>initial_list_status</td>
+                        <td>f</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Term</td>
+                        <td>36</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>Employee length</td>
+                        <td>2-4</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>Months since issue date</td>
+                        <td>42-48</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>Interest rate</td>
+                        <td>&lt 9.548</td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>Months since earliest credit line</td>
+                        <td>&gt 352</td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td>Inquries in last 6 months</td>
+                        <td>1-2</td>
+                    </tr>
+                    <tr>
+                        <td>13</td>
+                        <td>Account now delinquency</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>14</td>
+                        <td>Annual income</td>
+                        <td>70K-80K</td>
+                    </tr>
+                    <tr>
+                        <td>15</td>
+                        <td>dti</td>
+                        <td>21.7-22.4</td>
+                    </tr>
+                    <tr>
+                        <td>16</td>
+                        <td>Months since last delinq</td>
+                        <td>Missing</td>
+                    </tr>
+                    <tr>
+                        <td>17</td>
+                        <td>Months since last record</td>
+                        <td>Missing</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="output-wrapper">
+            <div id="credit-score-wrapper">
+                <h2>Your credit score</h2>
+                <div class="container">
+                    <div class="circular-progress">
+                        <div class="value-container">
+                            0%
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            <div id="probability-of-default-wrapper">
+                <h2>Your probability of default</h2>
+                <div class="container">
+                    <div class="circular-progress">
+                        <div class="value-container">
+                            0%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    let speed = 20;
+
+    // Meter for Probability of Default
+    let progressBarPD = document.querySelector("#probability-of-default-wrapper .circular-progress");
+    let valueContainerPD = document.querySelector("#probability-of-default-wrapper .value-container");
+
+    let progressValuePD = 0;
+    let progressEndValuePD = 65;
+
+    let progressPD = setInterval(()=>{
+        progressValuePD++;
+        valueContainerPD.textContent = `${progressValuePD}%`;
+        progressBarPD.style.background= `conic-gradient(#4d5bf9 ${progressValuePD * 3.6}deg, #cadcff ${progressValuePD * 3.6}deg)`;
+        if(progressValuePD==progressEndValuePD){
+            clearInterval(progressPD);
+        }
+    },speed);
+
+    // Meter for credit score
+    let progressBarCS = document.querySelector("#credit-score-wrapper .circular-progress");
+    let valueContainerCS = document.querySelector("#credit-score-wrapper .value-container");
+
+    let minVal=300;
+    let maxVal=850;
+
+    let progressValueCS = ((300-minVal)/(maxVal-minVal))*100;
+    let progressEndValueCS = Math.floor(((650-minVal)/(maxVal-minVal))*100);
+
+    let progressCS = setInterval(()=>{
+        progressValueCS++;
+        valueContainerCS.textContent = `${ Math.floor(((progressValueCS*(maxVal-minVal))/100)+minVal) }`;
+        progressBarCS.style.background= `conic-gradient(#4d5bf9 ${progressValueCS * 3.6}deg, #cadcff ${progressValueCS * 3.6}deg)`;
+        if(progressValueCS==progressEndValueCS){
+            clearInterval(progressCS);
+        }
+    },speed);
+
+    // Remove any other active menu. Active the dashboard menu. Change text at top to Dashboard
+    $("a").removeClass("active");
+    $("#dashboard").addClass("active");
+    $("#page").text("Dashboard");
+</script>
+
+{%endblock%}

@@ -1,0 +1,38 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Fill Credit Details Page{% endblock %}
+
+{% block content %}
+
+<main id="main">
+    <div class="box">
+
+    </div>
+    <form method="POST" enctype="multipart/form-data">
+        {{form.hidden_tag()}}
+        {% for field in form %}
+        {% if field.id != 'csrf_token' %}
+    
+            {{field.label()}}
+            {{field()}}
+    
+            {% if field.description and not field.errors %}
+                {{field.description}}
+            {% endif %}
+    
+            {% for error in field.errors %}
+            {{error}}
+            {% endfor %}
+    
+        {% endif %}
+        {% endfor %}
+    </form>
+</main>
+
+<script>
+    $("a").removeClass("active");
+    $("#fill-credit-details").addClass("active");
+    $("#page").text("Fill Credit Details");
+</script>
+
+{%endblock%}
