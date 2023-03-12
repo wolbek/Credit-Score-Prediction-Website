@@ -1,7 +1,7 @@
 ## Run the Project Locally
 
 ### Clone the repository:  
-```git clone```
+```git clone https://github.com/wolbek/Credit-Score-Prediction-Website.git```
 
 ### CD into the project:  
 ```cd flaskcreditscoreproject```
