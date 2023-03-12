@@ -51,7 +51,10 @@ def logout():
 @app.route("/dashboard_home")
 @login_required
 def dashboard_home():
-    return render_template('dashboard_home.html')
+    credit_details=CreditDetails.query.filter_by(user_id=current_user.user_id).first()
+    credit_score=451
+    prob_of_default=65
+    return render_template('dashboard_home.html', credit_details=credit_details, credit_score=credit_score, prob_of_default= prob_of_default)
 
 @app.route("/")
 def home():
@@ -59,10 +62,15 @@ def home():
 
 @app.route("/dashboard_fill_credit_details", methods=['GET','POST'])
 def dashboard_fill_credit_details():
+    # credit_details=CreditDetails.query.filter_by(user_id=current_user.user_id).first()
+    # if credit_details:
+    #     form=CreditDetailsForm(obj=credit_details)   
+    # else: 
     form=CreditDetailsForm()
     if form.validate_on_submit():
+        # form.populate_obj(credit_details)
         user_credit_details = CreditDetails(
-            user_id = current_user.id,
+            user_id = current_user.user_id,
 
             grade= form.grade.data,
             home_ownership= form.home_ownership.data,
@@ -87,3 +95,5 @@ def dashboard_fill_credit_details():
         db.session.commit()
         return redirect(url_for('dashboard_home'))
     return render_template('dashboard_fill_credit_details.html', form=form)
+
+

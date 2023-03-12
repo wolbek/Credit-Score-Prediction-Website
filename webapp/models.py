@@ -27,7 +27,8 @@ class User(db.Model,UserMixin):
         return checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
 
 class CreditDetails(db.Model):
-    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), primary_key=True)
+    credit_detail_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
 
     grade= db.Column(db.String(5), nullable=False, server_default='')
     home_ownership= db.Column(db.String(50), nullable=False, server_default='')

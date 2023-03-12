@@ -8,7 +8,12 @@
 
 {% block content %}
 
-<main id="main">
+<main>
+    {% if credit_details is none %}
+        <div id="not-filled-msg">
+            Fill Credit details to get the score and probability of default.
+        </div>
+    {% else %}
     <div class="recent-grid">
         <div id="input-wrapper">
             <h2>Your credit details</h2>
@@ -24,87 +29,87 @@
                     <tr>
                         <td>1</td>
                         <td>Grade</td>
-                        <td>A</td>
+                        <td>{{credit_details.grade}}</td>
                     </tr>
                     <tr>
                         <td>2</td>
                         <td>Home ownership</td>
-                        <td>Mortgage</td>
+                        <td>{{credit_details.home_ownership}}</td>
                     </tr>
                     <tr>
                         <td>3</td>
                         <td>Address state</td>
-                        <td>KS_SC_CO_VT_AK_MS</td>
+                        <td>{{credit_details.addr_state}}</td>
                     </tr>
                     <tr>
                         <td>4</td>
                         <td>Verification status</td>
-                        <td>Source Verified</td>
+                        <td>{{credit_details.verification_status}}</td>
                     </tr>
                     <tr>
                         <td>5</td>
-                        <td>Purpose</td>
-                        <td>Debt consolidation</td>
+                        <td>Employee length</td>
+                        <td>{{credit_details.emp_length}}</td>
                     </tr>
                     <tr>
                         <td>6</td>
-                        <td>initial_list_status</td>
-                        <td>f</td>
+                        <td>Purpose</td>
+                        <td>{{credit_details.purpose}}</td>
                     </tr>
                     <tr>
                         <td>7</td>
-                        <td>Term</td>
-                        <td>36</td>
+                        <td>initial_list_status</td>
+                        <td>{{credit_details.initial_list_status}}</td>
                     </tr>
                     <tr>
                         <td>8</td>
-                        <td>Employee length</td>
-                        <td>2-4</td>
+                        <td>Term</td>
+                        <td>{{credit_details.term}}</td>
                     </tr>
                     <tr>
                         <td>9</td>
                         <td>Months since issue date</td>
-                        <td>42-48</td>
+                        <td>{{credit_details.mths_since_issue_d}}</td>
                     </tr>
                     <tr>
                         <td>10</td>
                         <td>Interest rate</td>
-                        <td>&lt 9.548</td>
+                        <td>{{credit_details.int_rate}}</td>
                     </tr>
                     <tr>
                         <td>11</td>
                         <td>Months since earliest credit line</td>
-                        <td>&gt 352</td>
+                        <td>{{credit_details.mths_since_earliest_cr_line}}</td>
                     </tr>
                     <tr>
                         <td>12</td>
                         <td>Inquries in last 6 months</td>
-                        <td>1-2</td>
+                        <td>{{credit_details.inq_last_6mths}}</td>
                     </tr>
                     <tr>
                         <td>13</td>
                         <td>Account now delinquency</td>
-                        <td>0</td>
+                        <td>{{credit_details.acc_now_delinq}}</td>
                     </tr>
                     <tr>
                         <td>14</td>
                         <td>Annual income</td>
-                        <td>70K-80K</td>
+                        <td>{{credit_details.annual_inc}}</td>
                     </tr>
                     <tr>
                         <td>15</td>
                         <td>dti</td>
-                        <td>21.7-22.4</td>
+                        <td>{{credit_details.dti}}</td>
                     </tr>
                     <tr>
                         <td>16</td>
                         <td>Months since last delinq</td>
-                        <td>Missing</td>
+                        <td>{{credit_details.mths_since_last_delinq}}</td>
                     </tr>
                     <tr>
                         <td>17</td>
                         <td>Months since last record</td>
-                        <td>Missing</td>
+                        <td>{{credit_details.mths_since_last_record}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -116,7 +121,7 @@
                 <div class="container">
                     <div class="circular-progress">
                         <div class="value-container">
-                            0%
+                            300
                         </div>
                     </div>
                 </div>
@@ -134,17 +139,41 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </main>
 
 <script>
+    "{% if credit_details is not none%}"
+
     let speed = 20;
 
+    // Meter for credit score
+    let progressBarCS = document.querySelector("#credit-score-wrapper .circular-progress");
+    let valueContainerCS = document.querySelector("#credit-score-wrapper .value-container");
+
+    let minVal=300;
+    let maxVal=850;
+    //Floor because we're doing +1 in loop until it matches with compared value
+    let progressValueCS = ((300-minVal)/(maxVal-minVal))*100;
+    let progressEndValueCS = Math.round((("{{credit_score}}"-minVal)/(maxVal-minVal))*100);
+    console.log(progressEndValueCS);
+
+    if(progressEndValueCS!=0){
+        let progressCS = setInterval(()=>{
+        progressValueCS++;
+        valueContainerCS.textContent = `${ Math.round(((progressValueCS*(maxVal-minVal))/100)+minVal) }`;
+        progressBarCS.style.background= `conic-gradient(#4d5bf9 ${progressValueCS * 3.6}deg, #cadcff ${progressValueCS * 3.6}deg)`;
+        if(progressValueCS==progressEndValueCS){
+            clearInterval(progressCS);
+        }},speed);
+    }
+    
     // Meter for Probability of Default
     let progressBarPD = document.querySelector("#probability-of-default-wrapper .circular-progress");
     let valueContainerPD = document.querySelector("#probability-of-default-wrapper .value-container");
 
     let progressValuePD = 0;
-    let progressEndValuePD = 65;
+    let progressEndValuePD = "{{prob_of_default}}";
 
     let progressPD = setInterval(()=>{
         progressValuePD++;
@@ -155,24 +184,7 @@
         }
     },speed);
 
-    // Meter for credit score
-    let progressBarCS = document.querySelector("#credit-score-wrapper .circular-progress");
-    let valueContainerCS = document.querySelector("#credit-score-wrapper .value-container");
-
-    let minVal=300;
-    let maxVal=850;
-
-    let progressValueCS = ((300-minVal)/(maxVal-minVal))*100;
-    let progressEndValueCS = Math.floor(((650-minVal)/(maxVal-minVal))*100);
-
-    let progressCS = setInterval(()=>{
-        progressValueCS++;
-        valueContainerCS.textContent = `${ Math.floor(((progressValueCS*(maxVal-minVal))/100)+minVal) }`;
-        progressBarCS.style.background= `conic-gradient(#4d5bf9 ${progressValueCS * 3.6}deg, #cadcff ${progressValueCS * 3.6}deg)`;
-        if(progressValueCS==progressEndValueCS){
-            clearInterval(progressCS);
-        }
-    },speed);
+    "{% endif %}"
 
     // Remove any other active menu. Active the dashboard menu. Change text at top to Dashboard
     $("a").removeClass("active");

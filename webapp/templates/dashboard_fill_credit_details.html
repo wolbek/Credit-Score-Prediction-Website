@@ -4,29 +4,34 @@
 
 {% block content %}
 
-<main id="main">
-    <div class="box">
+<main>
+   
 
+    <div id="credit-details-form-wrapper">
+        <h2>Credit details form</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {{form.hidden_tag()}}
+                <div class="details personal">
+                    <!-- <span class="title">Personal Details</span> -->
+                    <div class="fields">
+                        <div class="input-field">
+                            <label>Full Name</label>
+                            <input type="text" value="{{current_user.first_name}}&nbsp;{{current_user.last_name}}" disabled>
+                        </div>
+                        {% for field in form %}
+                            {% if field.id != 'csrf_token' %}
+                                <div class="input-field">
+                                    {{field.label()}}
+                                    {{field()}}   
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <button type="submit">Submit</button>
+        </form>
     </div>
-    <form method="POST" enctype="multipart/form-data">
-        {{form.hidden_tag()}}
-        {% for field in form %}
-        {% if field.id != 'csrf_token' %}
-    
-            {{field.label()}}
-            {{field()}}
-    
-            {% if field.description and not field.errors %}
-                {{field.description}}
-            {% endif %}
-    
-            {% for error in field.errors %}
-            {{error}}
-            {% endfor %}
-    
-        {% endif %}
-        {% endfor %}
-    </form>
+
 </main>
 
 <script>

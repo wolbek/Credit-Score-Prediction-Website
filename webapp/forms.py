@@ -43,3 +43,5 @@ class CreditDetailsForm(FlaskForm):
     dti = SelectField(label="Debt to income ratio", validators=[InputRequired()], choices=["<=1.4", "1.4-3.5", "3.5-7.7", "7.7-10.5", "10.5-16.1", "16.1-20.3", "20.3-21.7", "21.7-22.4", "22.4-35", ">35"])
     mths_since_last_delinq = SelectField(label="Months since last delinquency", validators=[InputRequired()], choices=["Missing", "0 - 3", "4 - 30", "31 - 56", ">=57"])
     mths_since_last_record = SelectField(label="Months since last public record", validators=[InputRequired()], choices=["Missing", "0 - 2", "3 - 20", "21 - 31", "32 - 80", "81 - 86", ">86"])
+
+    # submit=SubmitField('Submit')
