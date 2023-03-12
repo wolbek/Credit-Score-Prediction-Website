@@ -385,6 +385,47 @@ button{
     overflow-x:auto;
 }
 
+/* Messages */
+
+#message .successful{
+    background-color: #D4EDDA;
+    border: 1px solid #C3E6CB;
+    max-width: 500px;
+    position: fixed;
+    align-items: center;
+    z-index: 999;
+    bottom: 15px;
+    right: 10px;
+    padding: 27px 20px;
+    border-radius: 5px;
+}
+
+#message .danger{
+    background-color: #F8D7DA;
+    border: 1px solid #F5C6CB;
+    max-width: 500px;
+    position: fixed;
+    align-items: center;
+    z-index: 999;
+    bottom: 15px;
+    right: 10px;
+    padding: 27px 20px;
+    border-radius: 5px;
+}
+
+#message .info{
+    background-color: #CCE5FF;
+    border: 1px solid #B6D8FD;
+    max-width: 500px;
+    position: fixed;
+    align-items: center;
+    z-index: 999;
+    bottom: 15px;
+    right: 10px;
+    padding: 27px 20px;
+    border-radius: 5px;
+}
+
 /* For all */
 
 a:link{
@@ -473,8 +514,6 @@ select{
         width: 345px;
     }
 
-    
-    
     #nav-toggle:checked + .sidebar .sidebar-brand,
     #nav-toggle:checked + .sidebar li {
         padding-left:1rem;

@@ -62,38 +62,46 @@ def home():
 
 @app.route("/dashboard_fill_credit_details", methods=['GET','POST'])
 def dashboard_fill_credit_details():
-    # credit_details=CreditDetails.query.filter_by(user_id=current_user.user_id).first()
-    # if credit_details:
-    #     form=CreditDetailsForm(obj=credit_details)   
-    # else: 
-    form=CreditDetailsForm()
+    filled_credit_details = False
+
+    credit_details=CreditDetails.query.filter_by(user_id=current_user.user_id).first()
+
+    if credit_details:
+        filled_credit_details=True
+        form=CreditDetailsForm(obj=credit_details)   
+    else: 
+        form=CreditDetailsForm()
+
     if form.validate_on_submit():
-        # form.populate_obj(credit_details)
-        user_credit_details = CreditDetails(
-            user_id = current_user.user_id,
-
-            grade= form.grade.data,
-            home_ownership= form.home_ownership.data,
-            addr_state= form.addr_state.data,
-            verification_status = form.verification_status.data,
-            emp_length = form.emp_length.data,
-
-            purpose = form.purpose.data,
-            initial_list_status= form.initial_list_status.data,
-            term = form.term.data,
-            mths_since_issue_d = form.mths_since_issue_d.data,
-            int_rate = form.int_rate.data,
-            mths_since_earliest_cr_line = form.mths_since_earliest_cr_line.data,
-            inq_last_6mths = form.inq_last_6mths.data,
-            acc_now_delinq = form.acc_now_delinq.data,
-            annual_inc = form.annual_inc.data,
-            dti = form.dti.data,
-            mths_since_last_delinq = form.mths_since_last_delinq.data,
-            mths_since_last_record = form.mths_since_last_record.data,
-        )
-        db.session.add(user_credit_details)
-        db.session.commit()
-        return redirect(url_for('dashboard_home'))
-    return render_template('dashboard_fill_credit_details.html', form=form)
-
+        if credit_details:
+            form.populate_obj(credit_details)
+            db.session.commit()
+            flash('You have successfully edited the credit details',category='successful')
+        else:
+            user_credit_details = CreditDetails(
+                user_id = current_user.user_id,
+                grade= form.grade.data,
+                home_ownership= form.home_ownership.data,
+                addr_state= form.addr_state.data,
+                verification_status = form.verification_status.data,
+                emp_length = form.emp_length.data,
+                purpose = form.purpose.data,
+                initial_list_status= form.initial_list_status.data,
+                term = form.term.data,
+                mths_since_issue_d = form.mths_since_issue_d.data,
+                int_rate = form.int_rate.data,
+                mths_since_earliest_cr_line = form.mths_since_earliest_cr_line.data,
+                inq_last_6mths = form.inq_last_6mths.data,
+                acc_now_delinq = form.acc_now_delinq.data,
+                annual_inc = form.annual_inc.data,
+                dti = form.dti.data,
+                mths_since_last_delinq = form.mths_since_last_delinq.data,
+                mths_since_last_record = form.mths_since_last_record.data,
+            )
+            db.session.add(user_credit_details)
+            db.session.commit()
+            flash('You have successfully submitted the credit details',category='successful')
+        return redirect(url_for('dashboard_fill_credit_details'))
+    
+    return render_template('dashboard_fill_credit_details.html', form=form, credit_details=credit_details,filled_credit_details=filled_credit_details)
 

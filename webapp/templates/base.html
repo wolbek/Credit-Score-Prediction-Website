@@ -11,12 +11,10 @@
 </head>
 
 <body>
-    <!-- All cdn's and common elements are listed here -->
     <div id="navbar">
         <h2>CreditX</h2>
         <div>
             {% if current_user.is_authenticated %}
-            <!-- <a href="{{url_for('logout')}}">Logout</a> -->
             <form action="{{url_for('logout')}}" method="POST" id="logout">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <a href="javascript:{}" onclick="document.getElementById('logout').submit();">Logout</a>
