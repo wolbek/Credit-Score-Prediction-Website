@@ -28,7 +28,7 @@
 ```.\run.bat seed-data```
 
 ### Run the application:   
-```.\run.bat run```
+```python run.py```
 
 ## Credentials for the Project
 ### To login:

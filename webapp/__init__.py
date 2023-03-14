@@ -3,11 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
+import os
 
 app=Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///database.db'
 app.config['SECRET_KEY']='secretkey'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
+app.config['UPLOAD_FOLDER']=os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads'),
 db=SQLAlchemy(app)
 csrf = CSRFProtect(app)
 

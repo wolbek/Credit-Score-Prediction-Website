@@ -34,11 +34,13 @@ class CreditDetails(db.Model):
     home_ownership= db.Column(db.String(50), nullable=False, server_default='')
     addr_state= db.Column(db.String(50), nullable=False, server_default='')
     verification_status= db.Column(db.String(50), nullable=False, server_default='')
-    emp_length = db.Column(db.String(50), nullable=False, server_default='')
 
     purpose = db.Column(db.String(50), nullable=False, server_default='')
     initial_list_status= db.Column(db.String(5), nullable=False, server_default='')
     term = db.Column(db.String(50), nullable=False, server_default='')
+
+    emp_length = db.Column(db.String(50), nullable=False, server_default='')
+
     mths_since_issue_d = db.Column(db.String(50), nullable=False, server_default='')
     int_rate = db.Column(db.String(50), nullable=False, server_default='')
     mths_since_earliest_cr_line = db.Column(db.String(50), nullable=False, server_default='')
