@@ -9,7 +9,7 @@
 ### Make virtual environment:  
 ```python -m venv venv```
 
-### To enable running scripts on system (type below command on Powershell administrator mode)
+### To enable running scripts on system (type below command on Powershell administrator mode. Ignore if already done)
 ```Set-ExecutionPolicy Unrestricted```
 
 ### Activate virtual environment:  
