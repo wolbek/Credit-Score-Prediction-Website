@@ -306,12 +306,22 @@ button{
     border-radius: 5px;
 }
 
+#credit-details-table caption{
+    background-color: rgb(255, 255, 255);
+    border-radius: 20px 20px 0px 0px;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    padding: 10px 5px;
+}
+
 #credit-details-table{
     border-collapse: collapse;
     margin: 25px 0;
     font-size:0.9em;
     width: 100%;
     background-color: white;
+    border-radius: 0px 0px 20px 20px;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+
 }
 
 #credit-details-table thead tr{
@@ -323,6 +333,7 @@ button{
 
 #credit-details-table th, #credit-details-table td{
     padding: 12px 15px;
+
 }
 
 #credit-details-table tbody tr{
@@ -342,9 +353,20 @@ button{
     width: 100%;
     margin: 22px 0px;
     background-color: #ffffff;
-    border-radius: 8px;
-    display: grid;
-    place-items: center;
+    border-radius: 20px;
+    /* display: grid;
+    place-items: center; */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    align-items: center;
+    align-content: center;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.container h3{
+    text-align: left;
 }
 
 .circular-progress{
@@ -355,6 +377,7 @@ button{
     display: grid;
     place-items: center;
     background: conic-gradient(#4d5bf9 0deg,  #cadcff 0deg);
+    margin: 10px;
 }
 
 .circular-progress:before{
