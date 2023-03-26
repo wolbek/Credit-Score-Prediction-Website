@@ -4,12 +4,12 @@
 ```git clone https://github.com/wolbek/Credit-Score-Prediction-Website.git```
 
 ### CD into the project:  
-```cd flaskcreditscoreproject```
+```cd Credit-Score-Prediction-Website```
 
 ### Make virtual environment:  
 ```python -m venv venv```
 
-### To enable running scripts on system
+### To enable running scripts on system (type below command on Powershell administrator mode)
 ```Set-ExecutionPolicy Unrestricted```
 
 ### Activate virtual environment:  
