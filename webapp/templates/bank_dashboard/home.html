@@ -1,0 +1,33 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Bank Dashboard Page{% endblock %}
+
+{% block links %}
+<link href="{{ url_for('static', filename='css/dashboard_home.css') }}" rel="stylesheet"/>
+{% endblock %} 
+
+{% block content %}
+
+<main>
+    {% if el %}
+    {{el}}
+    {% endif %}
+    <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input type="file" accept=".csv" name="csv-file" id="csv-file"/>
+        <button type="submit">Submit</button>
+    </form>
+    {% if el %}
+    {{el}}
+    {% endif %}
+</main>
+
+<script>
+
+    // Remove any other active menu. Active the dashboard menu. Change text at top to Dashboard
+    $("a").removeClass("active");
+    $("#dashboard").addClass("active");
+    $("#page").text("Dashboard");
+</script>
+
+{%endblock%}

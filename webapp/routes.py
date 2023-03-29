@@ -1,21 +1,26 @@
 from webapp import app,db,bcrypt
 from flask import redirect, render_template, url_for,flash, request
 from webapp.models import User, CreditDetails
-from webapp.forms import SignUpForm,LoginForm, CreditDetailsForm
+from webapp.forms import SignUpForm,LoginForm, CreditDetailsForm, CsvUploadForm
 from flask_login import current_user, login_required, login_user, logout_user
+from .expected_loss import expected_loss_func
 # import pickle
 import joblib
 import numpy as np
 import pandas as pd
 import os
-from sklearn.linear_model import LogisticRegression
-from sklearn import metrics
-from sklearn import linear_model
-import scipy.stats as stat
+# from sklearn.linear_model import LogisticRegression
+# from sklearn import metrics
+# from sklearn import linear_model
+# import scipy.stats as stat
 from webapp.global_constants import grade, home_ownership, addr_state, verification_status, emp_length, purpose, initial_list_status, term, mths_since_issue_d, int_rate, mths_since_earliest_cr_line, inq_last_6mths, acc_now_delinq, annual_inc, dti, mths_since_last_delinq, mths_since_last_record
 
 # from urllib import request
 # from sklearn.linear_model import LogisticRegression
+
+@app.route("/")
+def home():
+    return render_template('home.html')
 
 @app.route('/signup',methods=['GET','POST'])
 def signup():
@@ -60,9 +65,11 @@ def logout():
         flash('You have logged out successfully',category='successful')
         return redirect(url_for('home'))
 
-@app.route("/dashboard_home")
+# User routes
+
+@app.route("/user_dashboard_home")
 @login_required
-def dashboard_home():
+def user_dashboard_home():
     credit_score=0
     prob_of_default=0
 
@@ -217,16 +224,13 @@ def dashboard_home():
         
         prob_of_default = round(y_hat_proba_from_score[0][0] *100)
 
-    return render_template('dashboard_home.html', credit_details=credit_details, credit_score=credit_score, prob_of_default= prob_of_default)
+    return render_template('user_dashboard/home.html', credit_details=credit_details, credit_score=credit_score, prob_of_default= prob_of_default)
     # return render_template('dashboard_home.html', credit_details=credit_details)
 
 
-@app.route("/")
-def home():
-    return render_template('home.html')
-
-@app.route("/dashboard_fill_credit_details", methods=['GET','POST'])
-def dashboard_fill_credit_details():
+@app.route("/user_dashboard_fill_credit_details", methods=['GET','POST'])
+@login_required
+def user_dashboard_fill_credit_details():
     filled_credit_details = False
 
     credit_details=CreditDetails.query.filter_by(user_id=current_user.user_id).first()
@@ -266,7 +270,44 @@ def dashboard_fill_credit_details():
             db.session.add(user_credit_details)
             db.session.commit()
             flash('You have successfully submitted the credit details',category='successful')
-        return redirect(url_for('dashboard_fill_credit_details'))
+        return redirect(url_for('user_dashboard_fill_credit_details'))
     
-    return render_template('dashboard_fill_credit_details.html', form=form, credit_details=credit_details,filled_credit_details=filled_credit_details)
+    return render_template('user_dashboard/fill_credit_details.html', form=form, credit_details=credit_details,filled_credit_details=filled_credit_details)
 
+
+
+
+
+
+@app.route("/bank_dashboard_home", methods=['GET','POST'])
+@login_required
+def bank_dashboard_home():
+    # form=CsvUploadForm()
+    # if form.validate_on_submit():
+    #     print("------------------Inside")
+    #     el=expected_loss_func(form.csv_file.data)
+    #     print(el)
+    #     flash('You have successfully uploaded the form',category='successful')
+    #     return redirect(url_for('bank_dashboard_lgd'))
+    if request.method == 'POST':
+        if request.files:
+            uploaded_file = request.files['csv-file'] # This line uses the same variable and worked fine
+            el=expected_loss_func(uploaded_file)
+            print(el)
+            return render_template('bank_dashboard/home.html', el=el)
+            # filepath = os.path.join(app.config['FILE_UPLOADS'], uploaded_file.filename)
+            # uploaded_file.save(filepath)
+            # with open(filepath) as file:
+            #     csv_file = csv.reader(file)
+            #     for row in csv_file:
+            #         data.append(row)
+            # return redirect(request.url)
+
+    return render_template('bank_dashboard/home.html')
+
+
+
+@app.route("/bank_dashboard_lgd", methods=['GET','POST'])
+def bank_dashboard_lgd():
+    return render_template('bank_dashboard/lgd.html')
+    

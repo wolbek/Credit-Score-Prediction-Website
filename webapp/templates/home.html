@@ -2,7 +2,7 @@
 
 {% block title %}Home Page{% endblock %} 
 
-{% block links %}
+{% block styles %}
 <link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet"/>
 {% endblock %} 
 
@@ -19,7 +19,14 @@
           understand your current credit position. Regularly checking your
           credit reports can help you be more aware of what lenders may see.
         </p>
-        <a href="{{url_for('dashboard_home')}}" id="get-score">Get Score</a>
+        {% if not current_user.is_authenticated %}
+        <a href="{{url_for('user_dashboard_home')}}" id="get-score">Get Score</a>
+        {% elif current_user.role == 'User' %}
+        <a href="{{url_for('user_dashboard_home')}}" id="get-score">Get Score</a>
+        {% else %}
+        <a href="{{url_for('bank_dashboard_home')}}" id="get-score">Get Score</a>
+        {% endif %}
+
         <a href="#main" id="about">About</a>
       </div>
       <div id="banner-content-right-panel">

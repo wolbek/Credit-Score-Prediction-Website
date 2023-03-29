@@ -1,0 +1,113 @@
+/* Dashboard */
+
+#not-filled-msg{
+    margin-top:3.5rem;
+    background-color: #CCE5FF;
+    border: 1px solid #B6D8FD;
+    width: 100%;
+    align-items: center;
+    padding: 15px 20px;
+    border-radius: 5px;
+}
+
+#credit-details-table caption{
+    background-color: rgb(255, 255, 255);
+    border-radius: 20px 20px 0px 0px;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    padding: 10px 5px;
+}
+
+#credit-details-table{
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size:0.9em;
+    width: 100%;
+    background-color: white;
+    border-radius: 0px 0px 20px 20px;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+
+}
+
+#credit-details-table thead tr{
+    background-color: var(--main-color);
+    color: #ffffff;
+    text-align: left;
+    font-weight: bold;
+}
+
+#credit-details-table th, #credit-details-table td{
+    padding: 12px 15px;
+
+}
+
+#credit-details-table tbody tr{
+    border-bottom: 1px solid #dddddd;
+}
+
+#credit-details-table tbody tr:nth-of-type(even){
+    background-color: #f3f3f3;
+}
+
+#credit-details-table tbody tr:last-of-type{
+    border-bottom: 2px solid var(--main-color);
+}
+
+.container{
+    height: 350px;
+    width: 100%;
+    margin: 22px 0px;
+    background-color: #ffffff;
+    border-radius: 20px;
+    /* display: grid;
+    place-items: center; */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    align-items: center;
+    align-content: center;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.container h3{
+    text-align: left;
+}
+
+.circular-progress{
+    position: relative;
+    height: 250px;
+    width: 250px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: conic-gradient(#4d5bf9 0deg,  #cadcff 0deg);
+    margin: 10px;
+}
+
+.circular-progress:before{
+    content: "";
+    position: absolute;
+    height: 84%;
+    width: 84%;
+    background-color: #ffffff;
+    border-radius: 50%;
+}
+
+.value-container{
+    position: relative;
+    font-family: "Poppins", sans-serif;
+    font-size: 50px;
+    color: #231c3d;
+}
+
+.recent-grid{
+    margin-top:3.5rem;
+    display:grid;
+    grid-gap:2rem;
+    grid-template-columns: 50% auto;
+}
+
+.table-responsive{
+    width:100%;
+    overflow-x:auto;
+}

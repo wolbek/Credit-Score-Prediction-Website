@@ -10,6 +10,7 @@ def load_user(user_id):
 
 class User(db.Model,UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(255), nullable=False, unique=True)
     first_name = db.Column(db.String(100), nullable=False, server_default='')
     last_name = db.Column(db.String(100), nullable=False, server_default='')
@@ -66,6 +67,7 @@ def create_users_command():
         email='aakash@gmail.com',
         first_name='Aakash',
         last_name='Vishwakarma', 
+        role='User'
     )
     user_1.set_password('user')
     db.session.add(user_1)
@@ -76,9 +78,21 @@ def create_users_command():
         email='roy@gmail.com',
         first_name='Siddhant',
         last_name='Roy', 
+        role='User'
     )
     user_2.set_password('user')
     db.session.add(user_2)
+    db.session.commit()
+
+    #Creating bank
+    user_3=User(
+        email='bank@gmail.com',
+        first_name='Dinesh',
+        last_name='Kumar', 
+        role='Bank'
+    )
+    user_3.set_password('bank')
+    db.session.add(user_3)
     db.session.commit()
 
     click.echo('Users created.')

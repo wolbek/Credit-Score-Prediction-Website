@@ -2,7 +2,7 @@ from ast import Pass
 from tokenize import String
 from xml.dom import ValidationErr
 from flask_wtf import FlaskForm
-from wtforms import StringField,PasswordField,SubmitField, IntegerField, SelectField
+from wtforms import StringField,PasswordField,SubmitField, IntegerField, SelectField,FileField
 from wtforms.validators import InputRequired, Email, Length, ValidationError, EqualTo, Regexp
 from webapp.global_constants import grade, home_ownership, addr_state, verification_status, emp_length, purpose, initial_list_status, term, mths_since_issue_d, int_rate, mths_since_earliest_cr_line, inq_last_6mths, acc_now_delinq, annual_inc, dti, mths_since_last_delinq, mths_since_last_record
 from webapp.models import User
@@ -47,3 +47,6 @@ class CreditDetailsForm(FlaskForm):
     mths_since_last_record = SelectField(label="Months since last public record", validators=[InputRequired()], choices=[(op, op) for op in mths_since_last_record])
 
     # submit=SubmitField('Submit')
+
+class CsvUploadForm(FlaskForm):
+    csv_file=FileField(label='Photo', validators=[InputRequired()])
