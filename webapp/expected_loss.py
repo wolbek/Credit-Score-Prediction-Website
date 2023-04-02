@@ -6,15 +6,19 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import *
 from sklearn.metrics import precision_recall_fscore_support as score
 from sklearn.preprocessing import StandardScaler
-import joblib
-import tensorflow as tf
+
+# Use same sklearn version while saving and loading the model
+
+# For loading NN keras model
 import tensorflow.keras as keras
-from sklearn.utils import all_estimators
+
+# For loading xgboost model
+import pickle
+
+import tensorflow as tf
 import os
-# from sklearn.ensemble import RandomForestClassifier
-from xgboost import XGBClassifier
-# from sklearn.naive_bayes import GaussianNB
-from sklearn import linear_model
+from sklearn.metrics import roc_curve, roc_auc_score
+
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -24,28 +28,17 @@ class solver_stage1:
         self.models_data = {}
         self.models = models
 
-    def fit(self,X,y):
-        for key in self.models.keys():
-            if key == "xgb":
-                X.columns = X.columns.str.translate("".maketrans({"[":"{", "]":"}","<":"^"}))
-            elif key == "NN":
-                scaler = StandardScaler()
-                X_scaled = scaler.fit_transform(X)
-                self.models[key].fit(X_scaled,y,epochs=8, verbose=1,batch_size=512)
-                continue
-            self.models[key].fit(X,y)
-
     def evaluate(self,lgd_inputs_stage_1_test,lgd_targets_stage_1_test,tr = 0.5):
 
         self.eval = {'support':[],'fscore':[],'Recall':[],'accuracy':[],'Precision':[],'auc':[],'model':[]}
 
         for key in self.models.keys():
             self.eval['model'].append(key)
-            
 
             if key == "xgb":
                 lgd_inputs_stage_1_test.columns = lgd_inputs_stage_1_test.columns.str.translate("".maketrans({"[":"{", "]":"}","<":"^"}))
 
+            # For NN, PassiveAggressiveClassifier, RidgeClassifier, RidgeClassifierCV, SGDClassifier it goes to Except
             try:
                 y_hat_test_lgd_stage_1 = self.models[key].predict(lgd_inputs_stage_1_test)
                 y_hat_test_proba_lgd_stage_1 = self.models[key].predict_proba(lgd_inputs_stage_1_test)
@@ -78,26 +71,11 @@ class solver_stage1:
 
         return self.eval  
     
-    def load(self,solver_stage_num):
-        for key in self.models.keys():
-            self.models[key] = joblib.load(os.path.join(app.config['UPLOAD_FOLDER'][0], solver_stage_num, key+'.sav'))
-    
 class solver_stage2:
     
     def __init__(self,models):
         self.models_data = {}
         self.models = models
-
-    def fit(self,X,y):
-        for key in self.models.keys():
-            if key == "xgb":
-                X.columns = X.columns.str.translate("".maketrans({"[":"{", "]":"}","<":"^"}))
-            elif key == "NN":
-                scaler = StandardScaler()
-                X_scaled = scaler.fit_transform(X)
-                self.models[key].fit(X_scaled,y,epochs=3, verbose=1,batch_size=512)
-                continue
-            self.models[key].fit(X,y)
 
     def evaluate(self,X_test,y_true):
 
@@ -128,51 +106,8 @@ class solver_stage2:
             
         return self.eval  
 
-    def load(self,solver_stage_num):
-        for key in self.models.keys():
-            print(key)
-            print(os.path.join(app.config['UPLOAD_FOLDER'][0], solver_stage_num, key+'.sav'))
-            self.models[key] = joblib.load(os.path.join(app.config['UPLOAD_FOLDER'][0], solver_stage_num, key+'.sav'))
-
-regs = ['Lars', 'LarsCV', 'Lasso', 'LassoCV', 'LassoLars', 'LassoLarsCV', 'LassoLarsIC', 'LinearRegression', 
-            'MLPRegressor', 'NuSVR', 
-            'PLSRegression', 'PassiveAggressiveRegressor', 
-            'PoissonRegressor', 'RANSACRegressor', 'RandomForestRegressor', 'Ridge', 'RidgeCV', 
-            'SGDRegressor', 'TheilSenRegressor', 'TransformedTargetRegressor', 'TweedieRegressor',
-            'ARDRegression', 'AdaBoostRegressor', 'BaggingRegressor', 'BayesianRidge', 
-            'DecisionTreeRegressor', 'DummyRegressor', 'ElasticNet', 'ElasticNetCV', 'ExtraTreeRegressor', 
-            'ExtraTreesRegressor', 'GammaRegressor', 'GradientBoostingRegressor', 
-            'HistGradientBoostingRegressor', 'HuberRegressor', 'KNeighborsRegressor', 
-            ]
-
-def get_all_regressors_sklearn(models):
-    
-    estimators = all_estimators(type_filter='regressor')
-
-    for name, ClassifierClass in estimators:
-      if name in regs:
-          try:
-            models[name] = ClassifierClass()
-            # print('Appended', name)
-          except Exception as e:
-            print('Unable to import', name)
-            print(e)
-    return models
-
 col = ['fscore', 'Recall', 'accuracy', 'Precision', 'auc']
 weights = [1, 1, 1, 1, 1]
-
-def xscore(row):
-    row['Xscore'] = (sum(weights*row)/sum(weights))*100
-    return row
-
-def avg(row):
-    for x in col:
-        try:
-            row[x] = sum(row[x])/len(row[x])
-        except:
-            continue
-    return row
 
 def xscore(row):
     row['Xscore'] = (sum(weights*row)/sum(weights))*100
@@ -260,78 +195,55 @@ def expected_loss_func(csv_file):
     'purpose:credit_card',
     'initial_list_status:f']
 
-    # lgd_inputs_stage_1_train = lgd_inputs_stage_1_train[features_all]
-    # lgd_inputs_stage_1_train = lgd_inputs_stage_1_train.drop(features_reference_cat, axis = 1)
     lgd_inputs_stage_1_test = lgd_inputs_stage_1_test[features_all]
     lgd_inputs_stage_1_test = lgd_inputs_stage_1_test.drop(features_reference_cat, axis = 1)
-    lgd_inputs_stage_1_train.isnull().sum().sum()
     
-    model = tf.keras.Sequential([
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dense(256, activation='relu'),
-        tf.keras.layers.Dense(256, activation='relu'),
-        tf.keras.layers.Dense(1, activation='sigmoid')
-    ])
-
-    model.compile(loss='binary_crossentropy',
-                    optimizer=tf.keras.optimizers.Adam(), # use Adam instead of SGD
-                    metrics=['accuracy'])
-    
+    classifier_models = {}
     reg_models = {}
-
     
-    reg_models = get_all_regressors_sklearn(reg_models)
-
-    models = {
-        'NN' : model,
-    }
-
-    estimators = all_estimators(type_filter='classifier')
-
-    all_clfs = []
-    for name, ClassifierClass in estimators:
-        if name in ['LogisticRegression', 'LogisticRegressionCV','BernoulliNB', 'CalibratedClassifierCV','ComplementNB', 'DecisionTreeClassifier', 'DummyClassifier', 'ExtraTreeClassifier', 'ExtraTreesClassifier', 'GaussianNB',
-                        'GradientBoostingClassifier', 'HistGradientBoostingClassifier', 'LinearDiscriminantAnalysis','PassiveAggressiveClassifier',
-                        'QuadraticDiscriminantAnalysis','RidgeClassifier', 'RidgeClassifierCV', 'SGDClassifier','RandomForestClassifier']:
-            try:
-                models[name] = ClassifierClass()
-                # print('Appended', name)
-            except Exception as e:
-                print('Unable to import', name)
-                print(e)
+    # The comment ones are giving different outputs when loaded compared to when fitted.
+    # NN
+    classifiers = ['NN', 'BernoulliNB', 'CalibratedClassifierCV', 'ComplementNB', 'DecisionTreeClassifier', 'DummyClassifier', 'ExtraTreeClassifier', 'ExtraTreesClassifier', 'GaussianNB', 'GradientBoostingClassifier', 'HistGradientBoostingClassifier', 'LinearDiscriminantAnalysis', 'LogisticRegression', 'LogisticRegressionCV', 'PassiveAggressiveClassifier', 'QuadraticDiscriminantAnalysis', 'RandomForestClassifier', 'RidgeClassifier', 'RidgeClassifierCV', 'SGDClassifier', 'xgb']
+    # AdaBoostRegressor, BaggingRegressor, TheilSenRegressor
+    regressors = ['ARDRegression', 'AdaBoostRegressor', 'BaggingRegressor', 'BayesianRidge', 'DecisionTreeRegressor', 'DummyRegressor', 'ElasticNet', 'ElasticNetCV', 'ExtraTreeRegressor', 'ExtraTreesRegressor', 'GammaRegressor', 'GradientBoostingRegressor', 'HistGradientBoostingRegressor', 'HuberRegressor', 'KNeighborsRegressor', 'Lars', 'LarsCV', 'Lasso', 'LassoCV', 'LassoLars', 'LassoLarsCV', 'LassoLarsIC', 'LinearRegression', 'MLPRegressor', 'NuSVR', 'PLSRegression', 'PassiveAggressiveRegressor', 'PoissonRegressor', 'RANSACRegressor', 'RandomForestRegressor', 'Ridge', 'RidgeCV', 'SGDRegressor', 'TheilSenRegressor', 'TransformedTargetRegressor', 'TweedieRegressor']
     
-    models['xgb'] = XGBClassifier()
+    for name in classifiers:
+        if name == 'NN':
+            classifier_models[name] = keras.models.load_model(os.path.join(app.config['UPLOAD_FOLDER'][0], 'classifiers', name+'.h5'))
+        else:
+            classifier_models[name] = pickle.load(open(os.path.join(app.config['UPLOAD_FOLDER'][0], 'classifiers', name+'.pkl'), 'rb'))
 
-    sol1 = solver_stage1(models)
-    # sol1.fit(lgd_inputs_stage_1_train, lgd_targets_stage_1_train)
-    sol1 = sol1.load('solver_stage1')
-    eval = sol1.evaluate(lgd_inputs_stage_1_test,lgd_targets_stage_1_test)
-    
+    for name in regressors:
+        reg_models[name] = pickle.load(open(os.path.join(app.config['UPLOAD_FOLDER'][0], 'regressors', name+'.pkl'), 'rb'))
+   
+
+    sol1 = solver_stage1(classifier_models)
+    eval1 = sol1.evaluate(lgd_inputs_stage_1_test,lgd_targets_stage_1_test)
+
     print("2)Solver stage 1 Model evaluated data----------------------")
 
     lgd_stage_2_data = loan_data_defaults[loan_data_defaults['recovery_rate_0_1'] == 1]
     lgd_inputs_stage_2_train, lgd_inputs_stage_2_test, lgd_targets_stage_2_train, lgd_targets_stage_2_test = train_test_split(lgd_stage_2_data.drop(['good_bad', 'recovery_rate','recovery_rate_0_1', 'CCF'], axis = 1), lgd_stage_2_data['recovery_rate'], test_size = 0.2, random_state = 42)
-    # lgd_inputs_stage_2_train = lgd_inputs_stage_2_train[features_all]
-    # lgd_inputs_stage_2_train = lgd_inputs_stage_2_train.drop(features_reference_cat, axis = 1)
+    
     lgd_inputs_stage_2_test = lgd_inputs_stage_2_test[features_all]
     lgd_inputs_stage_2_test = lgd_inputs_stage_2_test.drop(features_reference_cat, axis = 1)
 
 
     sol2 = solver_stage2(reg_models)
-    # sol2.fit(lgd_inputs_stage_2_train, lgd_targets_stage_2_train)
-    sol2 = sol2.load('solver_stage2')
     eval2 = sol2.evaluate(lgd_inputs_stage_2_test,lgd_targets_stage_2_test)
+
     print("2)Solver stage 2 Model evaluated data----------------------")
 
+    details = eval1
 
-    details = eval
     df = pd.DataFrame(details)
     df = df.set_index('model')
-    
-
     df = df.drop(columns=['support'])
     df = df.apply(avg,axis=1)
     df = df.apply(xscore,axis=1)
+
+    # Model evaluation
+    # ...
 
     # Heat map
     mo = 'NN'
@@ -346,7 +258,6 @@ def expected_loss_func(csv_file):
 
     df_actual_predicted_probs['y_hat_test'] = np.where(df_actual_predicted_probs['y_hat_test_proba'] > tr, 1, 0)
 
-    from sklearn.metrics import roc_curve, roc_auc_score
     y_true, y_pred = 	df_actual_predicted_probs['loan_data_targets_test']	, df_actual_predicted_probs['y_hat_test']
     roc_curve(df_actual_predicted_probs['loan_data_targets_test'], df_actual_predicted_probs['y_hat_test_proba'], pos_label=1)
     # Returns the Receiver Operating Characteristic (ROC) Curve from a set of actual values and their predicted probabilities.
@@ -380,7 +291,10 @@ def expected_loss_func(csv_file):
     df = df.sort_values(by=['Xscore'], ascending=False)
     model_pd = df.index[0]
     best_stage1 = sol1.models_data[df.index[0]]['df_preds']['y_hat_test_lgd_stage_1']
-    print(df)
+    print('best_stage1------------------------------------')
+    print(type(best_stage1))
+    print(best_stage1)
+    # print(df)
 
     # Stage 2
 
@@ -388,7 +302,12 @@ def expected_loss_func(csv_file):
     df = pd.DataFrame(details)
     df = df.set_index('model')
     df = df.sort_values(by=['R2 score'], ascending=False)
+    print("df----------------------------------------------------")
+    print(df)
     best_stage2 = sol2.models[df.index[0]].predict(lgd_inputs_stage_1_test)
+    print('best_stage2------------------------------------')
+    print(type(best_stage2))
+    print(best_stage2)
     model_reg = df.index[0]
     LGD = best_stage1*best_stage2
     print(LGD)
@@ -396,14 +315,10 @@ def expected_loss_func(csv_file):
     # EAD
 
     ead_inputs_train, ead_inputs_test, ead_targets_train, ead_targets_test = train_test_split(loan_data_defaults.drop(['good_bad', 'recovery_rate', 'recovery_rate_0_1', 'CCF'], axis = 1), loan_data_defaults['CCF'], test_size = 0.2, random_state = 42)
-    # ead_inputs_train = ead_inputs_train[features_all]
-    # ead_inputs_train = ead_inputs_train.drop(features_reference_cat, axis = 1)
     ead_inputs_test = ead_inputs_test[features_all]
     ead_inputs_test = ead_inputs_test.drop(features_reference_cat, axis = 1)
 
     sol3 = solver_stage2(reg_models)
-    # sol3.fit(ead_inputs_train, ead_targets_train)
-    sol3 = sol3.load('solver_stage3')
     eval3 = sol3.evaluate(ead_inputs_test,ead_targets_test)
     print("3)Solver stage 3 Model evaluated data----------------------")
 
@@ -434,23 +349,16 @@ def expected_loss_func(csv_file):
 
     X_train, x_test, Y_train, y_test = train_test_split(loan_data_preprocessed.drop(['good_bad'], axis = 1), loan_data_preprocessed['good_bad'], test_size = 0.2, random_state = 42)
 
-    # X_train = X_train[features_all]
-    # X_train = X_train.drop(features_reference_cat, axis = 1)
     x_test = x_test[features_all]
     x_test = x_test.drop(features_reference_cat, axis = 1)
 
-    sol4 = solver_stage1(models)
-    # sol4.fit(X_train, Y_train)
-    sol4 = sol4.load('solver_stage4')
+    sol4 = solver_stage1(classifier_models)
     eval4 = sol4.evaluate( x_test, y_test)
     print("4)Solver stage 4 Model evaluated data----------------------")
-
 
     details = eval4
     df = pd.DataFrame(details)
     df = df.set_index('model')
-    # col = ['fscore', 'Recall', 'accuracy', 'Precision', 'auc']
-    # weights = [1, 1, 1, 1, 1]
 
     df = df.drop(columns=['support'])
     df = df.apply(avg,axis=1)

@@ -10,7 +10,7 @@
 } */
 
 #banner-content{
-    height: 93vh;
+    height: 94vh;
     padding-left: 5%;
     padding-right: 5%;
     display: flex;
@@ -35,7 +35,7 @@
 }
 
 #banner-content-left-panel, #banner-content-right-panel{
-    width: 50%;
+    width: 100%;
 }
 
 #banner-content-right-panel{
