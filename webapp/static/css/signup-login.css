@@ -63,8 +63,8 @@ h1{
 
 .box input[type="submit"]:hover{
     cursor: pointer;
-    background: #ffc107;
-    color: #000;
+    background: #2c2c2c;
+    color: #ffffff;
 }
 
 .box a{
@@ -75,7 +75,7 @@ h1{
 }
 
 .box a:hover{
-    color: #ffc107;
+    color: #07ff1c;
 }
 
 /* #signup-link{

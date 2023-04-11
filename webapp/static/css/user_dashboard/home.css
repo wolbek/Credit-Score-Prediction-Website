@@ -1,4 +1,4 @@
-/* Dashboard */
+/* User Dashboard Home*/
 
 #not-filled-msg{
     margin-top:3.5rem;
@@ -98,13 +98,6 @@
     font-family: "Poppins", sans-serif;
     font-size: 50px;
     color: #231c3d;
-}
-
-.recent-grid{
-    margin-top:3.5rem;
-    display:grid;
-    grid-gap:2rem;
-    grid-template-columns: 50% auto;
 }
 
 .table-responsive{

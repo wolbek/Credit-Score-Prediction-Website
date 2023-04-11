@@ -3,23 +3,37 @@
 {% block title %}Bank Dashboard Page{% endblock %}
 
 {% block links %}
-<link href="{{ url_for('static', filename='css/dashboard_home.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/bank_dashboard/home.css') }}" rel="stylesheet"/>
 {% endblock %} 
 
 {% block content %}
 
 <main>
-    {% if el %}
-    {{el}}
-    {% endif %}
-    <form method="POST" enctype="multipart/form-data">
+    <form id="csv-input-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        <input type="file" accept=".csv" name="csv-file" id="csv-file"/>
+        Upload old file: &nbsp; &nbsp;<input type="file" accept=".csv" name="csv-file-train" id="csv-file-train" class="upload-btn"/>
+        Upload file to predict on: &nbsp; &nbsp; <input type="file" accept=".csv" name="csv-file-test" id="csv-file-test" class="upload-btn"/>
         <button type="submit">Submit</button>
     </form>
+    <div id="loading-div" style="display: none;">...Loading</div>
     {% if el %}
-    {{el}}
+
+    <div id="expected-loss" style="display: block;">$ {{el}}</div>
+    
     {% endif %}
+
+    <div id="all-charts">
+        <div id="model-evaluation-chart" style="width: 100%;"></div>
+        <div id="actual-predicted-chart" class="chart"></div>
+        <div id="recovery-rate-chart" class="chart"></div>
+        <div id="ccf-chart" class="chart"></div>
+        <div id="roc-chart" class="chart"></div>
+        <div id="gini-chart" class="chart"></div>
+        <div id="smirnov-chart" class="chart"></div>
+
+    </div>
+    
+
 </main>
 
 <script>
@@ -28,6 +42,259 @@
     $("a").removeClass("active");
     $("#dashboard").addClass("active");
     $("#page").text("Dashboard");
+    // json.dumps is compulsory or else the object starts with " and at first property starting with ", it'll get closed.
+    // So json.dumps convert " to &#34; 
+
+    $("#csv-input-form").submit(function(event){
+        event.preventDefault();
+        $("#loading-div").css("display","block");
+        $("#expected-loss").css("display","none");
+        this.submit();
+    })
+
+    let data=[];
+
+    "{% if all_charts_data %}"
+
+    let all_charts_data = JSON.parse({{all_charts_data | tojson }});
+    console.log(all_charts_data)
+
+    // Chart: Model evaluation Data
+
+    let algos = Object.keys(all_charts_data['model_eval_chart_data']);
+
+    let param = ['fscore', 'Recall', 'accuracy', 'Precision', 'auc', 'Xscore'];
+    let param_val = [[], [], [], [], [], []];
+    let bar_color=['#0B6623', '#708238', '#29AB87', '#004B49', '#1C352D', '#1A2421']
+
+    algos.forEach(function(algo) {
+        param_val[0].push(all_charts_data['model_eval_chart_data'][algo][0])
+        param_val[1].push(all_charts_data['model_eval_chart_data'][algo][1])
+        param_val[2].push(all_charts_data['model_eval_chart_data'][algo][2])
+        param_val[3].push(all_charts_data['model_eval_chart_data'][algo][3])
+        param_val[4].push(all_charts_data['model_eval_chart_data'][algo][4])
+        param_val[5].push(all_charts_data['model_eval_chart_data'][algo][5])
+    });
+
+    for(let i=0;i<param.length;i++){
+        data.push({
+            x: algos,
+            y: param_val[i],
+            name: param[i],
+            type: 'bar',
+            marker: {
+                color: bar_color[i],
+            }
+        })
+    }
+
+    console.log(data);
+
+    let layout = {
+        autosize: true,
+        title: 'Model Comparison Chart',
+        xaxis: {
+            title: 'Models',
+            tickangle: 15,
+        },
+        yaxis: {
+            title: '%'
+        },
+        barmode: 'group',
+        height: 700,
+    };
+
+    Plotly.newPlot('model-evaluation-chart', data, layout);
+
+    // Chart: Actual Predicted Data
+
+    data = [
+        {
+            z: [all_charts_data['actual_predicted_chart_data'][0],all_charts_data['actual_predicted_chart_data'][1]],
+            type: 'heatmap',
+            colorscale: [
+                [0, '#3D9970'],
+                [1, '#001f3f']
+            ]
+        }
+    ];
+
+    layout = {
+        autosize: true,
+        width:"100%",
+        title: 'Actual Predicted Chart',
+        xaxis: {
+            title: 'Predicted label'
+        },
+        yaxis: {
+            title: 'Actual label'
+        },
+        width: 750,
+        height: 500,
+    };
+
+    Plotly.newPlot('actual-predicted-chart', data, layout);
+
+    // Recovery rate chart 
+
+    data = [{
+        x: all_charts_data['recovery_rate_chart_data'],
+        type: 'histogram',
+        marker: {
+            color: '#001F3F' // Set color of bars
+        },
+        nbinsx: 25
+    }];
+
+    layout = {
+        autosize: true,
+        title: 'Recovery Rate Chart',
+        xaxis: {
+            title: 'Recovery %',
+        },
+        yaxis: {
+            title: 'Funded amount'
+        },
+        width: 750,
+        height: 500,
+    };
+
+    Plotly.newPlot('recovery-rate-chart', data, layout);
+
+    // CCF chart 
+
+    data = [{
+        x: all_charts_data['ccf_chart_data'],
+        type: 'histogram',
+        marker: {
+            color: '#001F3F' // Set color of bars
+        },
+        nbinsx: 100
+    }];
+
+    layout = {
+        autosize: true,
+        title: 'CCF Chart',
+        xaxis: {
+            title: 'Value',
+        },
+        yaxis: {
+            title: 'Frequency'
+        },
+        width: 750,
+        height: 500,
+    };
+
+    Plotly.newPlot('ccf-chart', data, layout);
+
+    // ROC chart
+
+    // data for line chart
+    trace1 = {
+        x: all_charts_data['auroc_chart_data']['line_plot'][0],
+        y: all_charts_data['auroc_chart_data']['line_plot'][1],
+        type: 'line'
+    };
+
+    // data for scatter chart
+    trace2 = {
+        x: all_charts_data['auroc_chart_data']['dash_plot'][0],
+        y: all_charts_data['auroc_chart_data']['dash_plot'][1],
+        type: 'scatter',
+        mode: 'markers'
+    };
+
+    layout = {
+        autosize: true,
+        title: 'ROC',
+        xaxis: {
+            title: 'False positive rate'
+        },
+        yaxis: {
+            title: 'True positive rate'
+        },
+        width: 750,
+        height: 500,
+    };
+
+    data = [trace1, trace2];
+    Plotly.newPlot('roc-chart', data, layout);
+
+    // Gini chart
+
+    // data for line chart
+    trace1 = {
+        x: all_charts_data['gini_chart_data']['line_plot'][0],
+        y: all_charts_data['gini_chart_data']['line_plot'][1],
+        type: 'line'
+    };
+
+    // data for scatter chart
+    trace2 = {
+        x: all_charts_data['gini_chart_data']['dash_plot'][0],
+        y: all_charts_data['gini_chart_data']['dash_plot'][1],
+        type: 'scatter',
+        mode: 'markers'
+    };
+
+    layout = {
+        autosize: true,
+        title: 'Gini',
+        xaxis: {
+            title: 'Cumulative % Population'
+        },
+        yaxis: {
+            title: 'Cumulative % Bad'
+        },
+        width: 750,
+        height: 500,
+    };
+
+    data = [trace1, trace2];
+    Plotly.newPlot('gini-chart', data, layout);
+
+
+    // Smirnov Chart
+
+    // data for line chart
+    trace1 = {
+        x: all_charts_data['smirnov_chart_data']['red_plot'][0],
+        y: all_charts_data['smirnov_chart_data']['red_plot'][1],
+        type: 'line',
+        line: {
+            color: 'red' // Set color of bars
+        },
+    };
+
+    // data for scatter chart
+    trace2 = {
+        x: all_charts_data['smirnov_chart_data']['blue_plot'][0],
+        y: all_charts_data['smirnov_chart_data']['blue_plot'][1],
+        type: 'line',
+        line: {
+            color: 'blue' // Set color of bars
+        },
+    };
+
+    layout = {
+        autosize: true,
+        title: 'Kolmogorov-Smirnov',
+        xaxis: {
+            title: 'Estimated Probability for being Good'
+        },
+        yaxis: {
+            title: 'Cumulative %'
+        },
+        width: 750,
+        height: 500,
+    };
+
+    data = [trace1, trace2];
+    Plotly.newPlot('smirnov-chart', data, layout);
+
+    "{% endif %}"
+
+    
 </script>
 
 {%endblock%}

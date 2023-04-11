@@ -1,3 +1,4 @@
+import json
 from webapp import app,db,bcrypt
 from flask import redirect, render_template, url_for,flash, request
 from webapp.models import User, CreditDetails
@@ -282,27 +283,18 @@ def user_dashboard_fill_credit_details():
 @app.route("/bank_dashboard_home", methods=['GET','POST'])
 @login_required
 def bank_dashboard_home():
-    # form=CsvUploadForm()
-    # if form.validate_on_submit():
-    #     print("------------------Inside")
-    #     el=expected_loss_func(form.csv_file.data)
-    #     print(el)
-    #     flash('You have successfully uploaded the form',category='successful')
-    #     return redirect(url_for('bank_dashboard_lgd'))
+   
     if request.method == 'POST':
         if request.files:
-            uploaded_file = request.files['csv-file'] # This line uses the same variable and worked fine
-            el=expected_loss_func(uploaded_file)
+            # uploaded_file_train = request.files['csv-file-train']
+            uploaded_file_test = request.files['csv-file-test']
+            el, all_charts_data=expected_loss_func(uploaded_file_test)
             print(el)
-            return render_template('bank_dashboard/home.html', el=el)
-            # filepath = os.path.join(app.config['FILE_UPLOADS'], uploaded_file.filename)
-            # uploaded_file.save(filepath)
-            # with open(filepath) as file:
-            #     csv_file = csv.reader(file)
-            #     for row in csv_file:
-            #         data.append(row)
-            # return redirect(request.url)
-
+            print(f"all_charts_data_type:{type(json.dumps(all_charts_data))}")
+            with open("data.json", "w") as f:
+                json.dump(all_charts_data, f)
+            return render_template('bank_dashboard/home.html', el=el, all_charts_data=json.dumps(all_charts_data))
+            
     return render_template('bank_dashboard/home.html')
 
 

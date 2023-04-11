@@ -1,3 +1,4 @@
+import json
 import numpy as np
 import pandas as pd
 from webapp import app,db,bcrypt
@@ -18,6 +19,9 @@ import pickle
 import tensorflow as tf
 import os
 from sklearn.metrics import roc_curve, roc_auc_score
+
+import seaborn as sns
+import matplotlib.pyplot  as plt
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -135,6 +139,14 @@ def expected_loss_func(csv_file):
     loan_data_defaults['recovery_rate'] = np.where(loan_data_defaults['recovery_rate'] < 0, 0, loan_data_defaults['recovery_rate'])
     loan_data_defaults['CCF'] = (loan_data_defaults['funded_amnt'] - loan_data_defaults['total_rec_prncp']) / loan_data_defaults['funded_amnt']
 
+    all_charts_data={}
+
+    # CCF and Recovery rate chart -----------------------------------------------------------------------------------------------------
+    all_charts_data['ccf_chart_data'] = loan_data_defaults['CCF'].tolist()
+    # Set bins 25 in above graph
+    all_charts_data['recovery_rate_chart_data'] = loan_data_defaults['recovery_rate'].tolist()
+    # Set bins 100 in above graph
+
     loan_data_defaults['recovery_rate_0_1'] = np.where(loan_data_defaults['recovery_rate'] == 0, 0, 1)
 
     lgd_inputs_stage_1_train, lgd_inputs_stage_1_test, lgd_targets_stage_1_train, lgd_targets_stage_1_test = train_test_split(loan_data_defaults.drop(['good_bad', 'recovery_rate', 'recovery_rate_0_1', 'CCF'], axis = 1), loan_data_defaults['recovery_rate_0_1'], test_size = 0.2, random_state = 42)
@@ -215,7 +227,7 @@ def expected_loss_func(csv_file):
 
     for name in regressors:
         reg_models[name] = pickle.load(open(os.path.join(app.config['UPLOAD_FOLDER'][0], 'regressors', name+'.pkl'), 'rb'))
-   
+
 
     sol1 = solver_stage1(classifier_models)
     eval1 = sol1.evaluate(lgd_inputs_stage_1_test,lgd_targets_stage_1_test)
@@ -242,15 +254,22 @@ def expected_loss_func(csv_file):
     df = df.apply(avg,axis=1)
     df = df.apply(xscore,axis=1)
 
-    # Model evaluation
-    # ...
+    # Chart 1: Model evaluation------------------------------------------------------------------------------------------------------
+    # all_charts_data['model_eval_chart_data'] = df.to_json(orient='split')
+    # all_charts_data['model_eval_chart_data'] = df.to_json(orient='records')
+    print("Model evaluation------------------------------")
+    all_charts_data['model_eval_chart_data']={}
+    for index, row in df.iterrows():
+        # print(index, row['fscore'], row['Recall'], row['accuracy'], row['Precision'], row['auc'], row['Xscore'])
+        all_charts_data['model_eval_chart_data'][index]=[row['fscore'],row['accuracy'],row['Precision'],row['auc'],row['Xscore']/100]
 
-    # Heat map
+    # Chart 2: Heat map------------------------------------------------------------------------------------------------------
     mo = 'NN'
     sol1.models_data[mo]['df_preds']
     cm = sol1.models_data[mo]['cm']
+    all_charts_data['actual_predicted_chart_data'] = cm.tolist()
 
-    # AUROC
+    # ROC ------------------------------------------------------------------------------------------------------
     df_actual_predicted_probs = sol1.models_data['xgb']['df_preds']
     tr = 0.5
 
@@ -259,14 +278,20 @@ def expected_loss_func(csv_file):
     df_actual_predicted_probs['y_hat_test'] = np.where(df_actual_predicted_probs['y_hat_test_proba'] > tr, 1, 0)
 
     y_true, y_pred = 	df_actual_predicted_probs['loan_data_targets_test']	, df_actual_predicted_probs['y_hat_test']
-    roc_curve(df_actual_predicted_probs['loan_data_targets_test'], df_actual_predicted_probs['y_hat_test_proba'], pos_label=1)
-    # Returns the Receiver Operating Characteristic (ROC) Curve from a set of actual values and their predicted probabilities.
-    # As a result, we get three arrays: the false positive rates, the true positive rates, and the thresholds.
 
     fpr, tpr, thresholds = roc_curve(df_actual_predicted_probs['loan_data_targets_test'], df_actual_predicted_probs['y_hat_test_proba'],pos_label=0)
     # Here we store each of the three arrays in a separate variable.
 
-    # Gini
+    # Getting in JSON format
+    fpr_list = fpr.tolist()
+    tpr_list = tpr.tolist()
+
+    all_charts_data['auroc_chart_data'] =  {
+        'line_plot': [fpr_list, tpr_list],
+        'dash_plot': [fpr_list, fpr_list]
+    }
+
+    # Gini--------------------------------------------------------------------------------------------------------------------------------
 
     df_actual_predicted_probs = df_actual_predicted_probs.sort_values('y_hat_test_proba')
     df_actual_predicted_probs['loan_data_targets_test'] = pd.to_numeric(df_actual_predicted_probs['loan_data_targets_test'])
@@ -285,8 +310,33 @@ def expected_loss_func(csv_file):
     df_actual_predicted_probs['Cumulative Perc Bad'] = df_actual_predicted_probs['Cumulative N Bad'] / (df_actual_predicted_probs.shape[0] - df_actual_predicted_probs['loan_data_targets_test'].sum())
     # We calculate the cumulative percentage of 'bad'.
 
-    # Smirnov
-    # ...
+    # Getting in JSON format
+    print("11111----------------------------------------------------------")
+    print(type(df_actual_predicted_probs['Cumulative Perc Population']))
+    print("----------------------------------------------------------")
+    print(type(df_actual_predicted_probs['Cumulative Perc Bad']))
+    cumulative_perc_population_list=df_actual_predicted_probs['Cumulative Perc Population'].tolist()
+    cumulative_perc_bad_list = df_actual_predicted_probs['Cumulative Perc Bad'].tolist()
+
+    all_charts_data['gini_chart_data'] = {
+        'line_plot' : [cumulative_perc_population_list, cumulative_perc_bad_list],
+        'dash_plot': [cumulative_perc_population_list, cumulative_perc_population_list]
+    }
+
+    # Smirnov------------------------------------------------------------------------------------------------------
+    
+    # Getting in JSON format
+    print("22222----------------------------------------------------------")
+    print(type(df_actual_predicted_probs['y_hat_test_proba']))
+    print("----------------------------------------------------------")
+    print(type(df_actual_predicted_probs['Cumulative Perc Good']))
+    y_hat_test_proba_list = df_actual_predicted_probs['y_hat_test_proba'].tolist()
+    cumulative_perc_good_list = df_actual_predicted_probs['Cumulative Perc Good'].tolist()
+
+    all_charts_data['smirnov_chart_data'] = {
+        'red_plot' : [y_hat_test_proba_list, cumulative_perc_bad_list],
+        'blue_plot' : [y_hat_test_proba_list, cumulative_perc_good_list]
+    }
 
     df = df.sort_values(by=['Xscore'], ascending=False)
     model_pd = df.index[0]
@@ -385,7 +435,7 @@ def expected_loss_func(csv_file):
     print(f"5)Expected loss----------------------{exp_loss}")
 
 
-    return exp_loss
+    return exp_loss, all_charts_data
 
 
 

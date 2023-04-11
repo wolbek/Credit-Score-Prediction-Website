@@ -266,12 +266,6 @@ select{
     }   
 }
 
-@media only screen and (max-width:999px){
-    .recent-grid{
-        grid-template-columns:100%;
-    }
-}
-
 @media only screen and (max-width:768px){    
 
     .sidebar{
@@ -312,4 +306,95 @@ select{
     #nav-toggle:checked ~ .main-content{
         margin-left: 0rem !important;
     }   
+}
+
+/* For child template stylesheets */
+
+.recent-grid{
+    margin-top:3.5rem;
+    display:grid;
+    grid-gap:2rem;
+    grid-template-columns: 50% auto;
+}
+
+@media only screen and (max-width:999px){
+    .recent-grid{
+        grid-template-columns:100%;
+    }
+}
+
+
+
+
+
+
+/* Bank Dashboard Home */
+
+/* Below style is working? */
+
+#all-charts{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    align-content: center;
+    display: flex;
+    /* flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center; */
+}
+
+#csv-input-form{
+    margin-top:3.5rem;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    align-content: center;
+    margin-bottom: 20px;
+}
+
+#expected-loss{
+    text-align: center;
+    font-size: 50px;
+    font-weight: 900;
+}
+
+/* #csv-input-form input[type="file"]{
+    display: none;
+} */
+
+/* #csv-input-form label{
+    display: inline-block;
+    color: white;
+    background-color: #2c2c2c;
+    text-align: center;
+    padding: 15px 40px;
+    user-select: none;
+    cursor: pointer;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    border-radius: 20px;
+} */
+
+#csv-input-form label i{
+    margin-right: 10px;
+}
+
+#csv-input-form label:active{
+    transform: scale(0.9);
+}
+
+/* #csv-input-form button{
+    text-align: center;
+    padding: 15px 40px;
+    user-select: none;
+    cursor: pointer;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+
+} */
+
+#csv-input-form button:hover{
+    color: white;
+    background-color: #2c2c2c;
 }
