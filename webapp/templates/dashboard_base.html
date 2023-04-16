@@ -36,19 +36,16 @@
             <li>
                 {% if current_user.role == 'User' %}
                 <a href="{{url_for('user_dashboard_home')}}" class="active" id="dashboard"><span class="las la-grip-horizontal"></span>
-                    <span>Dashboard</span></a>
+                    <span>User Dashboard</span></a>
                 {% else %}
                 <a href="{{url_for('bank_dashboard_home')}}" class="active" id="dashboard"><span class="las la-grip-horizontal"></span>
-                    <span>Dashboard</span></a>
+                    <span>Banker Dashboard</span></a>
                 {% endif %}
             </li>
             <li>
                 {% if current_user.role == 'User' %}
                 <a href="{{url_for('user_dashboard_fill_credit_details')}}" id="fill-credit-details"><span class="lab la-wpforms"></span>
                     <span>Fill Credit Details</span></a>
-                {% else %}
-                <a href="{{url_for('bank_dashboard_lgd')}}" id="fill-credit-details"><span class="lab la-wpforms"></span>
-                    <span>See LGD Details</span></a>
                 {% endif %}
             </li>
             <li>

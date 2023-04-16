@@ -5,6 +5,8 @@ from webapp.models import User, CreditDetails
 from webapp.forms import SignUpForm,LoginForm, CreditDetailsForm, CsvUploadForm
 from flask_login import current_user, login_required, login_user, logout_user
 from .expected_loss import expected_loss_func
+from flask import Flask, send_file
+import io
 # import pickle
 import joblib
 import numpy as np
@@ -286,14 +288,15 @@ def bank_dashboard_home():
    
     if request.method == 'POST':
         if request.files:
-            # uploaded_file_train = request.files['csv-file-train']
+            uploaded_file_train = request.files['csv-file-train']
             uploaded_file_test = request.files['csv-file-test']
-            el, all_charts_data=expected_loss_func(uploaded_file_test)
-            print(el)
+            exp_loss, fund_amt, exp_loss_perc, all_charts_data, all_tables_data, all_csv_charts_data=expected_loss_func(uploaded_file_train, uploaded_file_test)
+            print(f"Expected loss: {exp_loss}, Funded Amount: {fund_amt}, Expected Loss Percentage:{exp_loss_perc}")
             print(f"all_charts_data_type:{type(json.dumps(all_charts_data))}")
             with open("data.json", "w") as f:
                 json.dump(all_charts_data, f)
-            return render_template('bank_dashboard/home.html', el=el, all_charts_data=json.dumps(all_charts_data))
+   
+            return render_template('bank_dashboard/home.html', exp_loss=exp_loss, fund_amt=fund_amt, exp_loss_perc=exp_loss_perc, all_charts_data=json.dumps(all_charts_data), all_tables_data=all_tables_data, all_csv_charts_data = json.dumps(all_csv_charts_data))
             
     return render_template('bank_dashboard/home.html')
 

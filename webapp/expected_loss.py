@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import *
 from sklearn.metrics import precision_recall_fscore_support as score
 from sklearn.preprocessing import StandardScaler
-
+from xgboost import XGBClassifier
 # Use same sklearn version while saving and loading the model
 
 # For loading NN keras model
@@ -22,6 +22,7 @@ from sklearn.metrics import roc_curve, roc_auc_score
 
 import seaborn as sns
 import matplotlib.pyplot  as plt
+import xgboost as xgb
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -82,7 +83,7 @@ class solver_stage2:
         self.models = models
 
     def evaluate(self,X_test,y_true):
-
+        
         self.eval = {'model':[],'R2 score':[],'MAE':[],'explained_variance_score':[],
                     'RMSE':[],'mean_squared_log_error':[],'median_absolute_error':[],
                     'mean_poisson_deviance':[],'mean_gamma_deviance':[],'d2_pinball_score':[],'d2_tweedie_score':[]}
@@ -96,12 +97,12 @@ class solver_stage2:
             self.y_pred = y_pred
             self.eval['R2 score'].append(r2_score(y_true, y_pred))
             self.eval['MAE'].append(mean_absolute_error(y_true,y_pred))
-            self.eval['RMSE'].append(np.sqrt(mean_squared_error(y_true, y_pred)))
             self.eval['explained_variance_score'].append(explained_variance_score(y_true, y_pred))
+            self.eval['RMSE'].append(np.sqrt(mean_squared_error(y_true, y_pred)))
             self.eval['mean_squared_log_error'].append(mean_squared_log_error(y_true, y_pred, squared=False))
+            self.eval['median_absolute_error'].append(median_absolute_error(y_true, y_pred))
             self.eval['mean_poisson_deviance'].append(mean_poisson_deviance(y_true, y_pred))
             self.eval['mean_gamma_deviance'].append(mean_gamma_deviance(y_true, y_pred))
-            self.eval['median_absolute_error'].append(median_absolute_error(y_true, y_pred))
             self.eval['d2_pinball_score'].append(d2_pinball_score(y_true, y_pred))
             self.eval['d2_tweedie_score'].append(d2_tweedie_score(y_true, y_pred))
             df = pd.DataFrame(columns = ['y_test', 'y_pred'])
@@ -125,11 +126,16 @@ def avg(row):
             continue
     return row
 
-def expected_loss_func(csv_file):
-    print("1)Started----------------------")
-    loan_data_preprocessed = pd.read_csv(csv_file)
+def expected_loss_func(csv_file_train, csv_file_test):
+    print("Started-------------------------")
+    # loan_data_preprocessed_train = pd.read_csv(csv_file_train)
+    # Can write code for train data preprocessing and fitting.
+    # ...
 
-    loan_data_defaults = loan_data_preprocessed[loan_data_preprocessed['loan_status'].isin(['Charged Off','Does not meet the credit policy. Status:Charged Off'])]
+    loan_data_preprocessed_test = pd.read_csv(csv_file_test)
+    # Code for test data preprocessing and prediction on test data
+    loan_data_defaults = loan_data_preprocessed_test[loan_data_preprocessed_test['loan_status'].isin(['Charged Off','Does not meet the credit policy. Status:Charged Off'])]
+
     # fill the missing values with zeroes
     loan_data_defaults['mths_since_last_delinq'].fillna(0, inplace = True)
     loan_data_defaults['mths_since_last_record'].fillna(0, inplace=True)
@@ -139,17 +145,55 @@ def expected_loss_func(csv_file):
     loan_data_defaults['recovery_rate'] = np.where(loan_data_defaults['recovery_rate'] < 0, 0, loan_data_defaults['recovery_rate'])
     loan_data_defaults['CCF'] = (loan_data_defaults['funded_amnt'] - loan_data_defaults['total_rec_prncp']) / loan_data_defaults['funded_amnt']
 
-    all_charts_data={}
+    # Making all_csv_charts_data
+    all_csv_charts_data={}
 
-    # CCF and Recovery rate chart -----------------------------------------------------------------------------------------------------
-    all_charts_data['ccf_chart_data'] = loan_data_defaults['CCF'].tolist()
-    # Set bins 25 in above graph
-    all_charts_data['recovery_rate_chart_data'] = loan_data_defaults['recovery_rate'].tolist()
-    # Set bins 100 in above graph
+    grade_type_count=loan_data_defaults['grade'].value_counts()
+    home_ownership_type_count = loan_data_defaults['home_ownership'].value_counts()
+    verification_status_type_count = loan_data_defaults['verification_status'].value_counts()
+    purpose_type_count = loan_data_defaults['purpose'].value_counts()
+    initial_list_status_type_count = loan_data_defaults['initial_list_status'].value_counts()
+
+    all_csv_charts_data = {
+        'grade':{
+            'type': grade_type_count.index.tolist(),
+            'count': grade_type_count.tolist(),
+        },
+        'home_ownership':{
+            'type': home_ownership_type_count.index.tolist(),
+            'count': home_ownership_type_count.tolist(),
+        },
+        'verification_status':{
+            'type': verification_status_type_count.index.tolist(),
+            'count': verification_status_type_count.tolist(),
+        },
+        'purpose':{
+            'type': purpose_type_count.index.tolist(),
+            'count': purpose_type_count.tolist(),
+        },
+        'initial_list_status':{
+            'type': initial_list_status_type_count.index.tolist(),
+            'count': initial_list_status_type_count.tolist(),
+        }
+    }
+
+    # all_charts_data is for storing assessment charts data
+    all_charts_data={}
+    all_tables_data={}
+
+    # Chart1: CCF 
+    all_charts_data['ccf_chart_data'] = loan_data_defaults['CCF'].tolist() # Set bins 25 in this graph
+    # Chart 2: Recovery rate chart
+    all_charts_data['recovery_rate_chart_data'] = loan_data_defaults['recovery_rate'].tolist() # Set bins 100 in this graph
 
     loan_data_defaults['recovery_rate_0_1'] = np.where(loan_data_defaults['recovery_rate'] == 0, 0, 1)
 
+    # LGD  stage 1 -----------------------------------------------------------------------------------------------
+
     lgd_inputs_stage_1_train, lgd_inputs_stage_1_test, lgd_targets_stage_1_train, lgd_targets_stage_1_test = train_test_split(loan_data_defaults.drop(['good_bad', 'recovery_rate', 'recovery_rate_0_1', 'CCF'], axis = 1), loan_data_defaults['recovery_rate_0_1'], test_size = 0.2, random_state = 42)
+    # lgd_inputs_stage_1_test = loan_data_defaults.drop(['good_bad', 'recovery_rate', 'recovery_rate_0_1', 'CCF'], axis = 1)
+    # lgd_targets_stage_1_test = loan_data_defaults['recovery_rate_0_1']
+
 
     features_all = ['grade:A',
     'grade:B',
@@ -210,41 +254,31 @@ def expected_loss_func(csv_file):
     lgd_inputs_stage_1_test = lgd_inputs_stage_1_test[features_all]
     lgd_inputs_stage_1_test = lgd_inputs_stage_1_test.drop(features_reference_cat, axis = 1)
     
-    classifier_models = {}
-    reg_models = {}
+    solver_stage1_models = {}
+    solver_stage2_models = {}
+    solver_stage3_models = {}
+    solver_stage4_models = {}
     
-    # The comment ones are giving different outputs when loaded compared to when fitted.
-    # NN
-    classifiers = ['NN', 'BernoulliNB', 'CalibratedClassifierCV', 'ComplementNB', 'DecisionTreeClassifier', 'DummyClassifier', 'ExtraTreeClassifier', 'ExtraTreesClassifier', 'GaussianNB', 'GradientBoostingClassifier', 'HistGradientBoostingClassifier', 'LinearDiscriminantAnalysis', 'LogisticRegression', 'LogisticRegressionCV', 'PassiveAggressiveClassifier', 'QuadraticDiscriminantAnalysis', 'RandomForestClassifier', 'RidgeClassifier', 'RidgeClassifierCV', 'SGDClassifier', 'xgb']
-    # AdaBoostRegressor, BaggingRegressor, TheilSenRegressor
+    classifiers = ['BernoulliNB', 'CalibratedClassifierCV', 'ComplementNB', 'DecisionTreeClassifier', 'DummyClassifier', 'ExtraTreeClassifier', 'ExtraTreesClassifier', 'GaussianNB', 'GradientBoostingClassifier', 'HistGradientBoostingClassifier', 'LinearDiscriminantAnalysis', 'LogisticRegression', 'LogisticRegressionCV', 'NN', 'PassiveAggressiveClassifier', 'QuadraticDiscriminantAnalysis', 'RandomForestClassifier', 'RidgeClassifier', 'RidgeClassifierCV', 'SGDClassifier', 'xgb']
     regressors = ['ARDRegression', 'AdaBoostRegressor', 'BaggingRegressor', 'BayesianRidge', 'DecisionTreeRegressor', 'DummyRegressor', 'ElasticNet', 'ElasticNetCV', 'ExtraTreeRegressor', 'ExtraTreesRegressor', 'GammaRegressor', 'GradientBoostingRegressor', 'HistGradientBoostingRegressor', 'HuberRegressor', 'KNeighborsRegressor', 'Lars', 'LarsCV', 'Lasso', 'LassoCV', 'LassoLars', 'LassoLarsCV', 'LassoLarsIC', 'LinearRegression', 'MLPRegressor', 'NuSVR', 'PLSRegression', 'PassiveAggressiveRegressor', 'PoissonRegressor', 'RANSACRegressor', 'RandomForestRegressor', 'Ridge', 'RidgeCV', 'SGDRegressor', 'TheilSenRegressor', 'TransformedTargetRegressor', 'TweedieRegressor']
-    
+
     for name in classifiers:
         if name == 'NN':
-            classifier_models[name] = keras.models.load_model(os.path.join(app.config['UPLOAD_FOLDER'][0], 'classifiers', name+'.h5'))
+            solver_stage1_models[name] = keras.models.load_model(os.path.join(app.config['UPLOAD_FOLDER'][0], 'solver_stage1_models', name+'.h5'))
+            solver_stage4_models[name] = keras.models.load_model(os.path.join(app.config['UPLOAD_FOLDER'][0], 'solver_stage4_models', name+'.h5'))
         else:
-            classifier_models[name] = pickle.load(open(os.path.join(app.config['UPLOAD_FOLDER'][0], 'classifiers', name+'.pkl'), 'rb'))
+            solver_stage1_models[name] = pickle.load(open(os.path.join(app.config['UPLOAD_FOLDER'][0], 'solver_stage1_models', name+'.pkl'), 'rb'))
+            solver_stage4_models[name] = pickle.load(open(os.path.join(app.config['UPLOAD_FOLDER'][0], 'solver_stage4_models', name+'.pkl'), 'rb'))
 
     for name in regressors:
-        reg_models[name] = pickle.load(open(os.path.join(app.config['UPLOAD_FOLDER'][0], 'regressors', name+'.pkl'), 'rb'))
+        solver_stage2_models[name] = pickle.load(open(os.path.join(app.config['UPLOAD_FOLDER'][0], 'solver_stage2_models', name+'.pkl'), 'rb'))
+        solver_stage3_models[name] = pickle.load(open(os.path.join(app.config['UPLOAD_FOLDER'][0], 'solver_stage3_models', name+'.pkl'), 'rb'))
 
 
-    sol1 = solver_stage1(classifier_models)
+    sol1 = solver_stage1(solver_stage1_models)
     eval1 = sol1.evaluate(lgd_inputs_stage_1_test,lgd_targets_stage_1_test)
 
-    print("2)Solver stage 1 Model evaluated data----------------------")
-
-    lgd_stage_2_data = loan_data_defaults[loan_data_defaults['recovery_rate_0_1'] == 1]
-    lgd_inputs_stage_2_train, lgd_inputs_stage_2_test, lgd_targets_stage_2_train, lgd_targets_stage_2_test = train_test_split(lgd_stage_2_data.drop(['good_bad', 'recovery_rate','recovery_rate_0_1', 'CCF'], axis = 1), lgd_stage_2_data['recovery_rate'], test_size = 0.2, random_state = 42)
-    
-    lgd_inputs_stage_2_test = lgd_inputs_stage_2_test[features_all]
-    lgd_inputs_stage_2_test = lgd_inputs_stage_2_test.drop(features_reference_cat, axis = 1)
-
-
-    sol2 = solver_stage2(reg_models)
-    eval2 = sol2.evaluate(lgd_inputs_stage_2_test,lgd_targets_stage_2_test)
-
-    print("2)Solver stage 2 Model evaluated data----------------------")
+    print("Solver stage 1 completed----------------------")
 
     details = eval1
 
@@ -254,22 +288,23 @@ def expected_loss_func(csv_file):
     df = df.apply(avg,axis=1)
     df = df.apply(xscore,axis=1)
 
-    # Chart 1: Model evaluation------------------------------------------------------------------------------------------------------
-    # all_charts_data['model_eval_chart_data'] = df.to_json(orient='split')
-    # all_charts_data['model_eval_chart_data'] = df.to_json(orient='records')
-    print("Model evaluation------------------------------")
+    # Chart 3: LGD stage 1 Classifiers Models comparison
+    
+    # Not showing AUC
     all_charts_data['model_eval_chart_data']={}
     for index, row in df.iterrows():
-        # print(index, row['fscore'], row['Recall'], row['accuracy'], row['Precision'], row['auc'], row['Xscore'])
-        all_charts_data['model_eval_chart_data'][index]=[row['fscore'],row['accuracy'],row['Precision'],row['auc'],row['Xscore']/100]
+        # all_charts_data['model_eval_chart_data'][index]=[row['fscore'], row['Recall'],row['accuracy'],row['Precision'],row['auc'],row['Xscore']/100]
+        all_charts_data['model_eval_chart_data'][index]=[row['fscore'], row['Recall'],row['accuracy'],row['Precision'],row['auc'],row['Xscore']/100]
 
-    # Chart 2: Heat map------------------------------------------------------------------------------------------------------
+    # Chart 4: Heat map
+
     mo = 'NN'
     sol1.models_data[mo]['df_preds']
     cm = sol1.models_data[mo]['cm']
     all_charts_data['actual_predicted_chart_data'] = cm.tolist()
 
-    # ROC ------------------------------------------------------------------------------------------------------
+    # Chart 5: ROC 
+
     df_actual_predicted_probs = sol1.models_data['xgb']['df_preds']
     tr = 0.5
 
@@ -279,10 +314,10 @@ def expected_loss_func(csv_file):
 
     y_true, y_pred = 	df_actual_predicted_probs['loan_data_targets_test']	, df_actual_predicted_probs['y_hat_test']
 
-    fpr, tpr, thresholds = roc_curve(df_actual_predicted_probs['loan_data_targets_test'], df_actual_predicted_probs['y_hat_test_proba'],pos_label=0)
+    fpr, tpr, thresholds = roc_curve(df_actual_predicted_probs['loan_data_targets_test'], df_actual_predicted_probs['y_hat_test_proba'])
     # Here we store each of the three arrays in a separate variable.
 
-    # Getting in JSON format
+    # Converting to list
     fpr_list = fpr.tolist()
     tpr_list = tpr.tolist()
 
@@ -291,10 +326,11 @@ def expected_loss_func(csv_file):
         'dash_plot': [fpr_list, fpr_list]
     }
 
-    # Gini--------------------------------------------------------------------------------------------------------------------------------
+    # Chart 6: Gini
 
     df_actual_predicted_probs = df_actual_predicted_probs.sort_values('y_hat_test_proba')
-    df_actual_predicted_probs['loan_data_targets_test'] = pd.to_numeric(df_actual_predicted_probs['loan_data_targets_test'])
+    df_actual_predicted_probs = df_actual_predicted_probs.reset_index()
+
 
     df_actual_predicted_probs['Cumulative N Population'] = df_actual_predicted_probs.index + 1
     # We calculate the cumulative number of all observations.
@@ -310,11 +346,7 @@ def expected_loss_func(csv_file):
     df_actual_predicted_probs['Cumulative Perc Bad'] = df_actual_predicted_probs['Cumulative N Bad'] / (df_actual_predicted_probs.shape[0] - df_actual_predicted_probs['loan_data_targets_test'].sum())
     # We calculate the cumulative percentage of 'bad'.
 
-    # Getting in JSON format
-    print("11111----------------------------------------------------------")
-    print(type(df_actual_predicted_probs['Cumulative Perc Population']))
-    print("----------------------------------------------------------")
-    print(type(df_actual_predicted_probs['Cumulative Perc Bad']))
+    # Converting pandas series to list
     cumulative_perc_population_list=df_actual_predicted_probs['Cumulative Perc Population'].tolist()
     cumulative_perc_bad_list = df_actual_predicted_probs['Cumulative Perc Bad'].tolist()
 
@@ -323,13 +355,9 @@ def expected_loss_func(csv_file):
         'dash_plot': [cumulative_perc_population_list, cumulative_perc_population_list]
     }
 
-    # Smirnov------------------------------------------------------------------------------------------------------
+    # Chart 7: Smirnov
     
-    # Getting in JSON format
-    print("22222----------------------------------------------------------")
-    print(type(df_actual_predicted_probs['y_hat_test_proba']))
-    print("----------------------------------------------------------")
-    print(type(df_actual_predicted_probs['Cumulative Perc Good']))
+    # Getting in pandas series to list
     y_hat_test_proba_list = df_actual_predicted_probs['y_hat_test_proba'].tolist()
     cumulative_perc_good_list = df_actual_predicted_probs['Cumulative Perc Good'].tolist()
 
@@ -338,40 +366,90 @@ def expected_loss_func(csv_file):
         'blue_plot' : [y_hat_test_proba_list, cumulative_perc_good_list]
     }
 
+
+
+    # Table 1: LGD stage 1 Classifier Models comparison
+
     df = df.sort_values(by=['Xscore'], ascending=False)
     model_pd = df.index[0]
     best_stage1 = sol1.models_data[df.index[0]]['df_preds']['y_hat_test_lgd_stage_1']
-    print('best_stage1------------------------------------')
-    print(type(best_stage1))
-    print(best_stage1)
-    # print(df)
 
-    # Stage 2
+    all_tables_data['lgd_stage1_classifier_models_comparison']={}
+
+    for index, row in df.iterrows():
+        all_tables_data['lgd_stage1_classifier_models_comparison'][index]=[row['fscore'].round(2), row['Recall'].round(2), row['accuracy'].round(2),row['Precision'].round(2),row['auc'].round(2),row['Xscore'].round(2)]
+
+    # all_tables_data['lgd_stage1_classifier_models_comparison'] = df.to_html()
+    # all_tables_data['lgd_stage1_classifier_models_comparison'] = {
+    #     'Model': df.index.tolist(),
+    #     'Fscore':df['fscore'].round(2).tolist(),
+    #     'Recall':df['Recall'].round(2).tolist(),
+    #     'Accuracy':df['accuracy'].round(2).tolist(),
+    #     'Precision':df['Precision'].round(2).tolist(),
+    #     'AUC':df['auc'].round(2).tolist(),
+    #     'Xscore':df['Xscore'].round(2).tolist(),
+    # }
+
+    # LGD Stage 2  -----------------------------------------------------------------------------------------------
+
+    lgd_stage_2_data = loan_data_defaults[loan_data_defaults['recovery_rate_0_1'] == 1]
+    lgd_inputs_stage_2_train, lgd_inputs_stage_2_test, lgd_targets_stage_2_train, lgd_targets_stage_2_test = train_test_split(lgd_stage_2_data.drop(['good_bad', 'recovery_rate','recovery_rate_0_1', 'CCF'], axis = 1), lgd_stage_2_data['recovery_rate'], test_size = 0.2, random_state = 42)
+    #Is this line of code below represents the baove line of code?
+    # lgd_inputs_stage_2_test = lgd_stage_2_data.drop(['good_bad', 'recovery_rate','recovery_rate_0_1', 'CCF'], axis = 1)
+    # lgd_targets_stage_2_test = lgd_stage_2_data['recovery_rate']
+
+    lgd_inputs_stage_2_test = lgd_inputs_stage_2_test[features_all]
+    lgd_inputs_stage_2_test = lgd_inputs_stage_2_test.drop(features_reference_cat, axis = 1)
+
+    sol2 = solver_stage2(solver_stage2_models)
+    eval2 = sol2.evaluate(lgd_inputs_stage_2_test,lgd_targets_stage_2_test)
+
+    print("Solver stage 2 completed----------------------")
+
+    # Table 2: LGD stage 2 Regressor models comparison
 
     details = eval2
     df = pd.DataFrame(details)
     df = df.set_index('model')
     df = df.sort_values(by=['R2 score'], ascending=False)
-    print("df----------------------------------------------------")
-    print(df)
+
+    all_tables_data['lgd_stage2_regressor_models_comparison']={}
+    for index, row in df.iterrows():
+        all_tables_data['lgd_stage2_regressor_models_comparison'][index]=[row['R2 score'].round(2),row['MAE'].round(2),row['explained_variance_score'].round(2),row['RMSE'].round(2),row['mean_squared_log_error'].round(2),row['median_absolute_error'].round(2),row['mean_poisson_deviance'].round(2),row['mean_gamma_deviance'].round(2),row['d2_pinball_score'].round(2),row['d2_tweedie_score'].round(2)]
+    
+    # all_tables_data['lgd_stage2_regressor_models_comparison'] = df.to_html()
+
+    # all_tables_data['lgd_stage2_regressor_models_comparison'] = {
+    #     'Model':df.index.tolist(),
+    #     'R2 score':df['R2 score'].round(2).tolist(),
+    #     'MAE':df['MAE'].round(2).tolist(),
+    #     'Explained variance score':df['explained_variance_score'].round(2).tolist(),
+    #     'RMSE':df['RMSE'].round(2).tolist(),
+    #     'Mean squared log error':df['mean_squared_log_error'].round(2).tolist(),
+    #     'Median absolute error':df['median_absolute_error'].round(2).tolist(),
+    #     'Mean poisson deviance':df['mean_poisson_deviance'].round(2).tolist(),
+    #     'Mean gamma deviance':df['mean_gamma_deviance'].round(2).tolist(),
+    #     'D2 pinball score':df['d2_pinball_score'].round(2).tolist(),
+    #     'D2 tweedie score':df['d2_tweedie_score'].round(2).tolist()
+    # }
+
     best_stage2 = sol2.models[df.index[0]].predict(lgd_inputs_stage_1_test)
-    print('best_stage2------------------------------------')
-    print(type(best_stage2))
-    print(best_stage2)
+    
     model_reg = df.index[0]
     LGD = best_stage1*best_stage2
-    print(LGD)
-
-    # EAD
+    
+    # EAD --------------------------------------------------------------------------------------------------
 
     ead_inputs_train, ead_inputs_test, ead_targets_train, ead_targets_test = train_test_split(loan_data_defaults.drop(['good_bad', 'recovery_rate', 'recovery_rate_0_1', 'CCF'], axis = 1), loan_data_defaults['CCF'], test_size = 0.2, random_state = 42)
     ead_inputs_test = ead_inputs_test[features_all]
     ead_inputs_test = ead_inputs_test.drop(features_reference_cat, axis = 1)
 
-    sol3 = solver_stage2(reg_models)
+    sol3 = solver_stage2(solver_stage3_models)
     eval3 = sol3.evaluate(ead_inputs_test,ead_targets_test)
-    print("3)Solver stage 3 Model evaluated data----------------------")
+    print("Solver stage 3 completed----------------------")
 
+
+    # Table 3: EAD Regressor models comparison
 
     details = eval3
     df = pd.DataFrame(details)
@@ -379,32 +457,54 @@ def expected_loss_func(csv_file):
     df = df.sort_values(by=['R2 score'], ascending=False)
     model_ead = df.index[0]
 
-    print(df.head())
+    all_tables_data['ead_regressor_models_comparison']={}
+    for index, row in df.iterrows():
+        all_tables_data['ead_regressor_models_comparison'][index]=[row['R2 score'].round(2),row['MAE'].round(2),row['explained_variance_score'].round(2),row['RMSE'].round(2),row['mean_squared_log_error'].round(2),row['median_absolute_error'].round(2),row['mean_poisson_deviance'].round(2),row['mean_gamma_deviance'].round(2),row['d2_pinball_score'].round(2),row['d2_tweedie_score'].round(2)]
+    
+    # all_tables_data['ead_regressor_models_comparison'] = df.to_html()
+    
+    # all_tables_data['ead_regressor_models_comparison'] = {
+    #     'Model':df.index.tolist(),
+    #     'R2 score':df['R2 score'].round(2).tolist(),
+    #     'MAE':df['MAE'].round(2).tolist(),
+    #     'Explained variance score':df['explained_variance_score'].round(2).tolist(),
+    #     'RMSE':df['RMSE'].round(2).tolist(),
+    #     'Mean squared log error':df['mean_squared_log_error'].round(2).tolist(),
+    #     'Median absolute error':df['median_absolute_error'].round(2).tolist(),
+    #     'Mean poisson deviance':df['mean_poisson_deviance'].round(2).tolist(),
+    #     'Mean gamma deviance':df['mean_gamma_deviance'].round(2).tolist(),
+    #     'D2 pinball score':df['d2_pinball_score'].round(2).tolist(),
+    #     'D2 tweedie score':df['d2_tweedie_score'].round(2).tolist()
+    # }
 
-    # Expected Loss
-    loan_data_preprocessed['mths_since_last_delinq'].fillna(0, inplace = True)
-    loan_data_preprocessed['mths_since_last_record'].fillna(0, inplace = True)
-    loan_data_preprocessed_lgd_ead = loan_data_preprocessed[features_all]
+    # Expected Loss ------------------------------------------------------------------------------------------
+
+    loan_data_preprocessed_test['mths_since_last_delinq'].fillna(0, inplace = True)
+    loan_data_preprocessed_test['mths_since_last_record'].fillna(0, inplace = True)
+    loan_data_preprocessed_lgd_ead = loan_data_preprocessed_test[features_all]
     loan_data_preprocessed_lgd_ead = loan_data_preprocessed_lgd_ead.drop(features_reference_cat, axis = 1)
-    loan_data_preprocessed['recovery_rate_st_1'] = sol1.models[model_pd].predict(loan_data_preprocessed_lgd_ead)
-    loan_data_preprocessed['recovery_rate_st_2'] = sol2.models[model_reg].predict(loan_data_preprocessed_lgd_ead)
-    loan_data_preprocessed['recovery_rate'] = loan_data_preprocessed['recovery_rate_st_1'] * loan_data_preprocessed['recovery_rate_st_2']
-    loan_data_preprocessed['recovery_rate'] = np.where(loan_data_preprocessed['recovery_rate'] < 0, 0, loan_data_preprocessed['recovery_rate'])
-    loan_data_preprocessed['recovery_rate'] = np.where(loan_data_preprocessed['recovery_rate'] > 1, 1, loan_data_preprocessed['recovery_rate'])
-    loan_data_preprocessed['LGD'] = 1 - loan_data_preprocessed['recovery_rate']
-    loan_data_preprocessed['CCF'] = sol3.models[model_ead].predict(loan_data_preprocessed_lgd_ead)
-    loan_data_preprocessed['CCF'] = np.where(loan_data_preprocessed['CCF'] < 0, 0, loan_data_preprocessed['CCF'])
-    loan_data_preprocessed['CCF'] = np.where(loan_data_preprocessed['CCF'] > 1, 1, loan_data_preprocessed['CCF'])
-    loan_data_preprocessed['EAD'] = loan_data_preprocessed['CCF'] * loan_data_preprocessed_lgd_ead['funded_amnt']
+    loan_data_preprocessed_test['recovery_rate_st_1'] = sol1.models[model_pd].predict(loan_data_preprocessed_lgd_ead)
+    loan_data_preprocessed_test['recovery_rate_st_2'] = sol2.models[model_reg].predict(loan_data_preprocessed_lgd_ead)
+    loan_data_preprocessed_test['recovery_rate'] = loan_data_preprocessed_test['recovery_rate_st_1'] * loan_data_preprocessed_test['recovery_rate_st_2']
+    loan_data_preprocessed_test['recovery_rate'] = np.where(loan_data_preprocessed_test['recovery_rate'] < 0, 0, loan_data_preprocessed_test['recovery_rate'])
+    loan_data_preprocessed_test['recovery_rate'] = np.where(loan_data_preprocessed_test['recovery_rate'] > 1, 1, loan_data_preprocessed_test['recovery_rate'])
+    loan_data_preprocessed_test['LGD'] = 1 - loan_data_preprocessed_test['recovery_rate']
+    loan_data_preprocessed_test['CCF'] = sol3.models[model_ead].predict(loan_data_preprocessed_lgd_ead)
+    loan_data_preprocessed_test['CCF'] = np.where(loan_data_preprocessed_test['CCF'] < 0, 0, loan_data_preprocessed_test['CCF'])
+    loan_data_preprocessed_test['CCF'] = np.where(loan_data_preprocessed_test['CCF'] > 1, 1, loan_data_preprocessed_test['CCF'])
+    loan_data_preprocessed_test['EAD'] = loan_data_preprocessed_test['CCF'] * loan_data_preprocessed_lgd_ead['funded_amnt']
 
-    X_train, x_test, Y_train, y_test = train_test_split(loan_data_preprocessed.drop(['good_bad'], axis = 1), loan_data_preprocessed['good_bad'], test_size = 0.2, random_state = 42)
+    X_train, x_test, Y_train, y_test = train_test_split(loan_data_preprocessed_test.drop(['good_bad'], axis = 1), loan_data_preprocessed_test['good_bad'], test_size = 0.2, random_state = 42)
 
     x_test = x_test[features_all]
     x_test = x_test.drop(features_reference_cat, axis = 1)
 
-    sol4 = solver_stage1(classifier_models)
+    sol4 = solver_stage1(solver_stage4_models)
     eval4 = sol4.evaluate( x_test, y_test)
-    print("4)Solver stage 4 Model evaluated data----------------------")
+    print("Solver stage 4 completed----------------------")
+
+
+    # Table 4: PD classifier models comparison
 
     details = eval4
     df = pd.DataFrame(details)
@@ -416,26 +516,43 @@ def expected_loss_func(csv_file):
     df = df.sort_values(by=['Xscore'], ascending=False)
     model_pd_EL = df.index[0]
 
-    last = loan_data_preprocessed
+    all_tables_data['pd_classifier_models_comparison']={}
+    for index, row in df.iterrows():
+        all_tables_data['pd_classifier_models_comparison'][index]=[row['fscore'].round(2), row['Recall'].round(2), row['accuracy'].round(2),row['Precision'].round(2),row['auc'].round(2),row['Xscore'].round(2)]
+    
+    # all_tables_data['pd_classifier_models_comparison'] = df.to_html()
+    # all_tables_data['pd_classifier_models_comparison'] = {
+    #     'Model': df.index.tolist(),
+    #     'Fscore':df['fscore'].round(2).tolist(),
+    #     'Recall':df['Recall'].round(2).tolist(),
+    #     'Accuracy':df['accuracy'].round(2).tolist(),
+    #     'Precision':df['Precision'].round(2).tolist(),
+    #     'AUC':df['auc'].round(2).tolist(),
+    #     'Xscore':df['Xscore'].round(2).tolist(),
+    # }
+
+    last = loan_data_preprocessed_test
     last = last[features_all]
     last = last.drop(features_reference_cat, axis = 1)
 
 
     if model_pd_EL == 'NN':
-        loan_data_preprocessed['PD'] = sol4.models[model_pd_EL].predict(last)
+        loan_data_preprocessed_test['PD'] = sol4.models[model_pd_EL].predict(last)
     else:
-        loan_data_preprocessed['PD'] = sol4.models[model_pd_EL].predict_proba(last)[: ][: , 0]
-
-    loan_data_preprocessed['EL'] = loan_data_preprocessed['PD'] * loan_data_preprocessed['LGD'] * loan_data_preprocessed['EAD']
-    print(loan_data_preprocessed[['funded_amnt', 'PD', 'LGD', 'EAD', 'EL']].head())
-
-    exp_loss= loan_data_preprocessed['EL'].sum()
-    fund_amt=loan_data_preprocessed['funded_amnt'].sum()
-    exp_loss_perc=loan_data_preprocessed['EL'].sum() / loan_data_preprocessed['funded_amnt'].sum()*100
-    print(f"5)Expected loss----------------------{exp_loss}")
+        loan_data_preprocessed_test['PD'] = sol4.models[model_pd_EL].predict_proba(last)[: ][: , 0]
 
 
-    return exp_loss, all_charts_data
+    # Table 5: Funded amount, PD, LGD, EAD, EL of all accounts 
+    loan_data_preprocessed_test['EL'] = loan_data_preprocessed_test['PD'] * loan_data_preprocessed_test['LGD'] * loan_data_preprocessed_test['EAD']
+    # all_tables_data['amount_PD_LGD_EAD_EL']=loan_data_preprocessed_test[['funded_amnt', 'PD', 'LGD', 'EAD', 'EL']].to_html()
+    
+    print(loan_data_preprocessed_test.head(10))
+
+    exp_loss= loan_data_preprocessed_test['EL'].sum()
+    fund_amt=loan_data_preprocessed_test['funded_amnt'].sum()
+    exp_loss_perc=((loan_data_preprocessed_test['EL'].sum() / loan_data_preprocessed_test['funded_amnt'].sum())*98)
+
+    return exp_loss, fund_amt, exp_loss_perc, all_charts_data, all_tables_data, all_csv_charts_data
 
 
 
