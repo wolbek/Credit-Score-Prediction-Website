@@ -36,11 +36,11 @@
                         <td>Home ownership</td>
                         <td>{{credit_details.home_ownership}}</td>
                     </tr>
-                    <tr>
+                    <!-- <tr>
                         <td>3</td>
                         <td>Address state</td>
                         <td>{{credit_details.addr_state}}</td>
-                    </tr>
+                    </tr> -->
                     <tr>
                         <td>4</td>
                         <td>Verification status</td>
@@ -111,6 +111,41 @@
                         <td>Months since last record</td>
                         <td>{{credit_details.mths_since_last_record}}</td>
                     </tr>
+                    <tr>
+                        <td>18</td>
+                        <td>Installment</td>
+                        <td>{{credit_details.installment}}</td>
+                    </tr>
+                    <tr>
+                        <td>19</td>
+                        <td>Funded Amount</td>
+                        <td>{{credit_details.funded_amnt}}</td>
+                    </tr>
+                    <tr>
+                        <td>20</td>
+                        <td>Delinquency in 2 years</td>
+                        <td>{{credit_details.delinq_2yrs}}</td>
+                    </tr>
+                    <tr>
+                        <td>21</td>
+                        <td>Open accounts</td>
+                        <td>{{credit_details.open_acc}}</td>
+                    </tr>
+                    <tr>
+                        <td>22</td>
+                        <td>Public records count</td>
+                        <td>{{credit_details.pub_rec}}</td>
+                    </tr>
+                    <tr>
+                        <td>23</td>
+                        <td>Total accounts</td>
+                        <td>{{credit_details.total_acc}}</td>
+                    </tr>
+                    <tr>
+                        <td>24</td>
+                        <td>Total Revolving High Credit Limit</td>
+                        <td>{{credit_details.total_rev_hi_lim}}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -119,7 +154,7 @@
             <div id="credit-score-wrapper">
                 
                 <div class="container">
-                    <h3>Your credit score</h3>
+                    <h3>Your Credit Score</h3>
                     <div class="circular-progress">
                         <div class="value-container">
                             300
@@ -130,7 +165,7 @@
             </div>
             <div id="probability-of-default-wrapper">
                 <div class="container">
-                    <h3>Your probability of non-default</h3>
+                    <h3>Your Probability Of Default</h3>
                     <div class="circular-progress">
                         <div class="value-container">
                             0%

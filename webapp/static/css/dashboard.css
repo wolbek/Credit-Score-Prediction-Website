@@ -339,7 +339,7 @@ select{
     align-content: center;
 }
 
-#all-charts{
+#lgd-stage1-charts{
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -447,23 +447,23 @@ select{
 
 /* Bankers Table */
 
-#all-classifier-tables, #all-regressor-tables{
+/* #all-classifier-tables, #all-regressor-tables{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     align-content: center;
     text-align: center;
-}
+} */
 
-#all-classifier-tables table caption, #all-regressor-tables table caption{
+.green-table caption{
     background-color: rgb(255, 255, 255);
     border-radius: 20px 20px 0px 0px;
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
     padding: 10px 5px;
 }
 
-#all-classifier-tables table, #all-regressor-tables table{
+.green-table{
     border-collapse: collapse;
     margin: 25px 0;
     font-size:0.9em;
@@ -474,27 +474,27 @@ select{
 
 }
 
-#all-classifier-tables table thead tr, #all-regressor-tables table thead tr{
+.green-table thead tr{
     background-color: var(--main-color);
     color: #ffffff;
     text-align: left;
     font-weight: bold;
 }
 
-#all-classifier-tables table th, #all-classifier-tables table td, #all-regressor-tables table th, #all-regressor-tables table td{
+.green-table th, .green-table td{
     padding: 12px 15px;
 
 }
 
-#all-classifier-tables table tbody tr, #all-regressor-tables table tbody tr{
+.green-table tbody tr{
     border-bottom: 1px solid #dddddd;
 }
 
-#all-classifier-tables table tbody tr:nth-of-type(even), #all-regressor-tables table tbody tr:nth-of-type(even){
+.green-table tbody tr:nth-of-type(even){
     background-color: #f3f3f3;
 }
 
-#all-classifier-tables table tbody tr:last-of-type, #all-regressor-tables table tbody tr:last-of-type{
+.green-table tbody tr:last-of-type{
     border-bottom: 2px solid var(--main-color);
 }
 
@@ -633,4 +633,49 @@ select{
     align-items: center;
     padding: 15px 20px;
     border-radius: 5px;
+}
+
+.chart-header-select{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    align-content: center;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.chart-header-select select{
+    outline:none;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+    border-radius: 5px;
+    border: 1px solid #aaa;
+    padding: 0 15px;
+    height: 42px;
+    margin: 8px 0;
+}
+
+.recent-grid-bank-home .content h1{
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.recent-grid-bank-home .content h2{
+    /* text-align: center; */
+    margin-bottom: 50px;
+    
+}
+
+.chart-table{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+}
+
+.param-explanation{
+    /* text-align: center; */
+    margin: 12px 20px 0px 20px;
 }

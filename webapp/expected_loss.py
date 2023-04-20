@@ -245,6 +245,8 @@ def expected_loss_func(csv_file_train, csv_file_test):
     'acc_now_delinq',
     'total_rev_hi_lim']
 
+    # grade, home_ownership, verification_status, purpose, initial_list_status, term_int, emp_length_int, mths_since_issue_d, mths_since_earliest_cr_line, funded_amnt,int_rate, installment, annual_inc, dti, delinq_2yrs, inq_last_6mths, mths_since_last_delinq, mths_since_last_record, open_acc, pub_rec, total_acc, acc_now_delinq, total_rev_hi_lim
+    
     features_reference_cat = ['grade:G',
     'home_ownership:RENT',
     'verification_status:Verified',
@@ -260,7 +262,8 @@ def expected_loss_func(csv_file_train, csv_file_test):
     solver_stage4_models = {}
     
     classifiers = ['BernoulliNB', 'CalibratedClassifierCV', 'ComplementNB', 'DecisionTreeClassifier', 'DummyClassifier', 'ExtraTreeClassifier', 'ExtraTreesClassifier', 'GaussianNB', 'GradientBoostingClassifier', 'HistGradientBoostingClassifier', 'LinearDiscriminantAnalysis', 'LogisticRegression', 'LogisticRegressionCV', 'NN', 'PassiveAggressiveClassifier', 'QuadraticDiscriminantAnalysis', 'RandomForestClassifier', 'RidgeClassifier', 'RidgeClassifierCV', 'SGDClassifier', 'xgb']
-    regressors = ['ARDRegression', 'AdaBoostRegressor', 'BaggingRegressor', 'BayesianRidge', 'DecisionTreeRegressor', 'DummyRegressor', 'ElasticNet', 'ElasticNetCV', 'ExtraTreeRegressor', 'ExtraTreesRegressor', 'GammaRegressor', 'GradientBoostingRegressor', 'HistGradientBoostingRegressor', 'HuberRegressor', 'KNeighborsRegressor', 'Lars', 'LarsCV', 'Lasso', 'LassoCV', 'LassoLars', 'LassoLarsCV', 'LassoLarsIC', 'LinearRegression', 'MLPRegressor', 'NuSVR', 'PLSRegression', 'PassiveAggressiveRegressor', 'PoissonRegressor', 'RANSACRegressor', 'RandomForestRegressor', 'Ridge', 'RidgeCV', 'SGDRegressor', 'TheilSenRegressor', 'TransformedTargetRegressor', 'TweedieRegressor']
+    # regressors = ['ARDRegression', 'AdaBoostRegressor', 'BaggingRegressor', 'BayesianRidge', 'DecisionTreeRegressor', 'DummyRegressor', 'ElasticNet', 'ElasticNetCV', 'ExtraTreeRegressor', 'ExtraTreesRegressor', 'GammaRegressor', 'GradientBoostingRegressor', 'HistGradientBoostingRegressor', 'HuberRegressor', 'KNeighborsRegressor', 'Lars', 'LarsCV', 'Lasso', 'LassoCV', 'LassoLars', 'LassoLarsCV', 'LassoLarsIC', 'LinearRegression', 'MLPRegressor', 'NuSVR', 'PLSRegression', 'PassiveAggressiveRegressor', 'PoissonRegressor', 'RANSACRegressor', 'RandomForestRegressor', 'Ridge', 'RidgeCV', 'SGDRegressor', 'TheilSenRegressor', 'TransformedTargetRegressor', 'TweedieRegressor']
+    regressors = ['ARDRegression', 'AdaBoostRegressor', 'BaggingRegressor', 'BayesianRidge', 'DecisionTreeRegressor', 'DummyRegressor', 'ElasticNet', 'ElasticNetCV', 'ExtraTreeRegressor', 'ExtraTreesRegressor', 'GammaRegressor', 'GradientBoostingRegressor', 'HistGradientBoostingRegressor', 'HuberRegressor', 'KNeighborsRegressor', 'Lars', 'LarsCV', 'Lasso', 'LassoCV', 'LassoLars', 'LassoLarsCV', 'LassoLarsIC', 'LinearRegression', 'NuSVR', 'PLSRegression', 'PassiveAggressiveRegressor', 'PoissonRegressor', 'RANSACRegressor', 'RandomForestRegressor', 'Ridge', 'RidgeCV', 'TheilSenRegressor', 'TransformedTargetRegressor', 'TweedieRegressor']
 
     for name in classifiers:
         if name == 'NN':
@@ -287,109 +290,187 @@ def expected_loss_func(csv_file_train, csv_file_test):
     df = df.drop(columns=['support'])
     df = df.apply(avg,axis=1)
     df = df.apply(xscore,axis=1)
+    df = df.sort_values(by=['Xscore'], ascending=False)
 
     # Chart 3: LGD stage 1 Classifiers Models comparison
     
-    # Not showing AUC
-    all_charts_data['model_eval_chart_data']={}
+    all_charts_data['model_eval_chart_data']={
+        'pd':{},
+        'lgd_stage1':{},
+        'lgd_stage2':{},
+        'ead':{}
+    }
+
     for index, row in df.iterrows():
-        # all_charts_data['model_eval_chart_data'][index]=[row['fscore'], row['Recall'],row['accuracy'],row['Precision'],row['auc'],row['Xscore']/100]
-        all_charts_data['model_eval_chart_data'][index]=[row['fscore'], row['Recall'],row['accuracy'],row['Precision'],row['auc'],row['Xscore']/100]
-
-    # Chart 4: Heat map
-
-    mo = 'NN'
-    sol1.models_data[mo]['df_preds']
-    cm = sol1.models_data[mo]['cm']
-    all_charts_data['actual_predicted_chart_data'] = cm.tolist()
-
-    # Chart 5: ROC 
-
-    df_actual_predicted_probs = sol1.models_data['xgb']['df_preds']
-    tr = 0.5
-
-    df_actual_predicted_probs.columns = ['loan_data_targets_test', 'y_hat_test_proba','y_hat_test']
-
-    df_actual_predicted_probs['y_hat_test'] = np.where(df_actual_predicted_probs['y_hat_test_proba'] > tr, 1, 0)
-
-    y_true, y_pred = 	df_actual_predicted_probs['loan_data_targets_test']	, df_actual_predicted_probs['y_hat_test']
-
-    fpr, tpr, thresholds = roc_curve(df_actual_predicted_probs['loan_data_targets_test'], df_actual_predicted_probs['y_hat_test_proba'])
-    # Here we store each of the three arrays in a separate variable.
-
-    # Converting to list
-    fpr_list = fpr.tolist()
-    tpr_list = tpr.tolist()
-
-    all_charts_data['auroc_chart_data'] =  {
-        'line_plot': [fpr_list, tpr_list],
-        'dash_plot': [fpr_list, fpr_list]
-    }
-
-    # Chart 6: Gini
-
-    df_actual_predicted_probs = df_actual_predicted_probs.sort_values('y_hat_test_proba')
-    df_actual_predicted_probs = df_actual_predicted_probs.reset_index()
-
-
-    df_actual_predicted_probs['Cumulative N Population'] = df_actual_predicted_probs.index + 1
-    # We calculate the cumulative number of all observations.
-    # We use the new index for that. Since indexing in ython starts from 0, we add 1 to each index.
-    df_actual_predicted_probs['Cumulative N Good'] = df_actual_predicted_probs['loan_data_targets_test'].cumsum()
-    # We calculate cumulative number of 'good', which is the cumulative sum of the column with actual observations.
-    df_actual_predicted_probs['Cumulative N Bad'] = df_actual_predicted_probs['Cumulative N Population'] - df_actual_predicted_probs['loan_data_targets_test'].cumsum()
-
-    df_actual_predicted_probs['Cumulative Perc Population'] = df_actual_predicted_probs['Cumulative N Population'] / (df_actual_predicted_probs.shape[0])
-    # We calculate the cumulative percentage of all observations.
-    df_actual_predicted_probs['Cumulative Perc Good'] = df_actual_predicted_probs['Cumulative N Good'] / df_actual_predicted_probs['loan_data_targets_test'].sum()
-    # We calculate cumulative percentage of 'good'.
-    df_actual_predicted_probs['Cumulative Perc Bad'] = df_actual_predicted_probs['Cumulative N Bad'] / (df_actual_predicted_probs.shape[0] - df_actual_predicted_probs['loan_data_targets_test'].sum())
-    # We calculate the cumulative percentage of 'bad'.
-
-    # Converting pandas series to list
-    cumulative_perc_population_list=df_actual_predicted_probs['Cumulative Perc Population'].tolist()
-    cumulative_perc_bad_list = df_actual_predicted_probs['Cumulative Perc Bad'].tolist()
-
-    all_charts_data['gini_chart_data'] = {
-        'line_plot' : [cumulative_perc_population_list, cumulative_perc_bad_list],
-        'dash_plot': [cumulative_perc_population_list, cumulative_perc_population_list]
-    }
-
-    # Chart 7: Smirnov
-    
-    # Getting in pandas series to list
-    y_hat_test_proba_list = df_actual_predicted_probs['y_hat_test_proba'].tolist()
-    cumulative_perc_good_list = df_actual_predicted_probs['Cumulative Perc Good'].tolist()
-
-    all_charts_data['smirnov_chart_data'] = {
-        'red_plot' : [y_hat_test_proba_list, cumulative_perc_bad_list],
-        'blue_plot' : [y_hat_test_proba_list, cumulative_perc_good_list]
-    }
-
-
+        all_charts_data['model_eval_chart_data']['lgd_stage1'][index]=[row['fscore'], row['Recall'],row['accuracy'],row['Precision'],row['auc'],row['Xscore']]
 
     # Table 1: LGD stage 1 Classifier Models comparison
-
-    df = df.sort_values(by=['Xscore'], ascending=False)
-    model_pd = df.index[0]
-    best_stage1 = sol1.models_data[df.index[0]]['df_preds']['y_hat_test_lgd_stage_1']
 
     all_tables_data['lgd_stage1_classifier_models_comparison']={}
 
     for index, row in df.iterrows():
         all_tables_data['lgd_stage1_classifier_models_comparison'][index]=[row['fscore'].round(2), row['Recall'].round(2), row['accuracy'].round(2),row['Precision'].round(2),row['auc'].round(2),row['Xscore'].round(2)]
 
-    # all_tables_data['lgd_stage1_classifier_models_comparison'] = df.to_html()
-    # all_tables_data['lgd_stage1_classifier_models_comparison'] = {
-    #     'Model': df.index.tolist(),
-    #     'Fscore':df['fscore'].round(2).tolist(),
-    #     'Recall':df['Recall'].round(2).tolist(),
-    #     'Accuracy':df['accuracy'].round(2).tolist(),
-    #     'Precision':df['Precision'].round(2).tolist(),
-    #     'AUC':df['auc'].round(2).tolist(),
-    #     'Xscore':df['Xscore'].round(2).tolist(),
+    model_pd = df.index[0]
+    best_stage1 = sol1.models_data[df.index[0]]['df_preds']['y_hat_test_lgd_stage_1']
+
+    
+
+    all_charts_data['actual_predicted_chart_data']={}
+    all_charts_data['auroc_chart_data']={}
+    all_charts_data['gini_chart_data']={}
+    all_charts_data['smirnov_chart_data']={}
+
+    for mo in classifiers:
+
+        # Chart 4: Confusion Matrix
+
+        cm = sol1.models_data[mo]['cm']
+        all_charts_data['actual_predicted_chart_data'][mo] = cm.tolist()
+
+        # Chart 5: ROC 
+
+        df_actual_predicted_probs = sol1.models_data[mo]['df_preds']
+        tr = 0.5
+
+        df_actual_predicted_probs.columns = ['loan_data_targets_test', 'y_hat_test_proba','y_hat_test']
+
+        df_actual_predicted_probs['y_hat_test'] = np.where(df_actual_predicted_probs['y_hat_test_proba'] > tr, 1, 0)
+
+        y_true, y_pred = 	df_actual_predicted_probs['loan_data_targets_test']	, df_actual_predicted_probs['y_hat_test']
+
+        fpr, tpr, thresholds = roc_curve(df_actual_predicted_probs['loan_data_targets_test'], df_actual_predicted_probs['y_hat_test_proba'])
+        # Here we store each of the three arrays in a separate variable.
+
+        # Converting to list
+        fpr_list = fpr.tolist()
+        tpr_list = tpr.tolist()
+
+        all_charts_data['auroc_chart_data'][mo] =  {
+            'line_plot': [fpr_list, tpr_list],
+            'dash_plot': [fpr_list, fpr_list]
+        }
+
+        # Chart 6: Gini
+
+        df_actual_predicted_probs = df_actual_predicted_probs.sort_values('y_hat_test_proba')
+        df_actual_predicted_probs = df_actual_predicted_probs.reset_index()
+
+
+        df_actual_predicted_probs['Cumulative N Population'] = df_actual_predicted_probs.index + 1
+        # We calculate the cumulative number of all observations.
+        # We use the new index for that. Since indexing in ython starts from 0, we add 1 to each index.
+        df_actual_predicted_probs['Cumulative N Good'] = df_actual_predicted_probs['loan_data_targets_test'].cumsum()
+        # We calculate cumulative number of 'good', which is the cumulative sum of the column with actual observations.
+        df_actual_predicted_probs['Cumulative N Bad'] = df_actual_predicted_probs['Cumulative N Population'] - df_actual_predicted_probs['loan_data_targets_test'].cumsum()
+
+        df_actual_predicted_probs['Cumulative Perc Population'] = df_actual_predicted_probs['Cumulative N Population'] / (df_actual_predicted_probs.shape[0])
+        # We calculate the cumulative percentage of all observations.
+        df_actual_predicted_probs['Cumulative Perc Good'] = df_actual_predicted_probs['Cumulative N Good'] / df_actual_predicted_probs['loan_data_targets_test'].sum()
+        # We calculate cumulative percentage of 'good'.
+        df_actual_predicted_probs['Cumulative Perc Bad'] = df_actual_predicted_probs['Cumulative N Bad'] / (df_actual_predicted_probs.shape[0] - df_actual_predicted_probs['loan_data_targets_test'].sum())
+        # We calculate the cumulative percentage of 'bad'.
+
+        # Converting pandas series to list
+        cumulative_perc_population_list=df_actual_predicted_probs['Cumulative Perc Population'].tolist()
+        cumulative_perc_bad_list = df_actual_predicted_probs['Cumulative Perc Bad'].tolist()
+
+        all_charts_data['gini_chart_data'][mo] = {
+            'line_plot' : [cumulative_perc_population_list, cumulative_perc_bad_list],
+            'dash_plot': [cumulative_perc_population_list, cumulative_perc_population_list]
+        }
+
+        # Chart 7: Smirnov
+        
+        # Getting in pandas series to list
+        y_hat_test_proba_list = df_actual_predicted_probs['y_hat_test_proba'].tolist()
+        cumulative_perc_good_list = df_actual_predicted_probs['Cumulative Perc Good'].tolist()
+
+        all_charts_data['smirnov_chart_data'][mo] = {
+            'red_plot' : [y_hat_test_proba_list, cumulative_perc_bad_list],
+            'blue_plot' : [y_hat_test_proba_list, cumulative_perc_good_list]
+        }
+
+    # We need
+
+    # PD :
+    # Model comparison table
+    # PD model comparison chart (For every different parameter: Fscore, Recall...)
+
+    # model_eval_chart_data:{
+    #     'pd':{
+    #         'NN':['facorevalue',...],
+    #         'xgb':['fscorevalue','....'],
+    #     },
+    #     'lgd_stage1':{
+    #         'NN':['facorevalue',...],
+    #         'xgb':['fscorevalue','....'],
+    #     },
+    #     'lgd_stage2':{
+    #         'regressor1':['R2scorevalue',...],
+    #         'regressor2':['R2scorevalue',...],
+    #     }
+    #     'ead':{
+    #         'regressor1':['R2scorevalue',...],
+    #         'regressor2':['R2scorevalue',...],
+    #     }
     # }
 
+    # LGD: 
+
+    # LGD stage 1 :
+    # Model comparison table
+    # LGD stage 1 model comparison chart (For every different parameter: Fscore, Recall...)
+    # Confusion matrix, Smirnov, Gini (for each model)
+
+    # For classifier models of LGD stage1
+    # 'gini_chart_data':{
+    #     'NN':{
+    #         'dash_plot':[,],
+    #         'line_plot':[,],
+    #     },
+    #     'xgb':{
+    #         'dash_plot':[,],
+    #         'line_plot':[,],
+    #     }
+    # }
+    # 'auroc_chart_data':{
+    #     'NN':{
+    #         'dash_plot':[,],
+    #         'line_plot':[,],
+    #     },
+    #     'xgb':{
+    #         'dash_plot':[,],
+    #         'line_plot':[,],
+    #     }
+    # }
+    # 'smirnov_chart_data':{
+    #     'NN':{
+    #         'dash_plot':[,],
+    #         'line_plot':[,],
+    #     },
+    #     'xgb':{
+    #         'dash_plot':[,],
+    #         'line_plot':[,],
+    #     }
+    # }
+    # 'actual_predicted_chart_data: {
+    #   'NN': [[],[]],
+    #   'xgb':[[],[]]
+    # }
+
+    # LGD stage 2 :
+    # Model comparison table
+    # LGD stage 2 Model comparison chart (For every different parameter: R2 score, RMSE...)
+
+    # EAD:
+    # Model comparison table
+    # EAD model comparison chart (For every different parameter: R2 score, RMSE...)
+
+
+    
+
+    
     # LGD Stage 2  -----------------------------------------------------------------------------------------------
 
     lgd_stage_2_data = loan_data_defaults[loan_data_defaults['recovery_rate_0_1'] == 1]
@@ -406,33 +487,22 @@ def expected_loss_func(csv_file_train, csv_file_test):
 
     print("Solver stage 2 completed----------------------")
 
-    # Table 2: LGD stage 2 Regressor models comparison
 
     details = eval2
     df = pd.DataFrame(details)
     df = df.set_index('model')
     df = df.sort_values(by=['R2 score'], ascending=False)
 
+    # Table 2: LGD stage 2 Regressor models comparison
+
+    for index, row in df.iterrows():
+        all_charts_data['model_eval_chart_data']['lgd_stage2'][index]=[row['R2 score'].round(2),row['MAE'].round(2),row['explained_variance_score'].round(2),row['RMSE'].round(2),row['mean_squared_log_error'].round(2),row['median_absolute_error'].round(2),row['mean_poisson_deviance'].round(2),row['mean_gamma_deviance'].round(2),row['d2_pinball_score'].round(2),row['d2_tweedie_score'].round(2)]
+
+
     all_tables_data['lgd_stage2_regressor_models_comparison']={}
     for index, row in df.iterrows():
         all_tables_data['lgd_stage2_regressor_models_comparison'][index]=[row['R2 score'].round(2),row['MAE'].round(2),row['explained_variance_score'].round(2),row['RMSE'].round(2),row['mean_squared_log_error'].round(2),row['median_absolute_error'].round(2),row['mean_poisson_deviance'].round(2),row['mean_gamma_deviance'].round(2),row['d2_pinball_score'].round(2),row['d2_tweedie_score'].round(2)]
     
-    # all_tables_data['lgd_stage2_regressor_models_comparison'] = df.to_html()
-
-    # all_tables_data['lgd_stage2_regressor_models_comparison'] = {
-    #     'Model':df.index.tolist(),
-    #     'R2 score':df['R2 score'].round(2).tolist(),
-    #     'MAE':df['MAE'].round(2).tolist(),
-    #     'Explained variance score':df['explained_variance_score'].round(2).tolist(),
-    #     'RMSE':df['RMSE'].round(2).tolist(),
-    #     'Mean squared log error':df['mean_squared_log_error'].round(2).tolist(),
-    #     'Median absolute error':df['median_absolute_error'].round(2).tolist(),
-    #     'Mean poisson deviance':df['mean_poisson_deviance'].round(2).tolist(),
-    #     'Mean gamma deviance':df['mean_gamma_deviance'].round(2).tolist(),
-    #     'D2 pinball score':df['d2_pinball_score'].round(2).tolist(),
-    #     'D2 tweedie score':df['d2_tweedie_score'].round(2).tolist()
-    # }
-
     best_stage2 = sol2.models[df.index[0]].predict(lgd_inputs_stage_1_test)
     
     model_reg = df.index[0]
@@ -449,7 +519,7 @@ def expected_loss_func(csv_file_train, csv_file_test):
     print("Solver stage 3 completed----------------------")
 
 
-    # Table 3: EAD Regressor models comparison
+    
 
     details = eval3
     df = pd.DataFrame(details)
@@ -457,26 +527,17 @@ def expected_loss_func(csv_file_train, csv_file_test):
     df = df.sort_values(by=['R2 score'], ascending=False)
     model_ead = df.index[0]
 
+
+    # Chart: EAD regressor Models comparison
+
+    for index, row in df.iterrows():
+        all_charts_data['model_eval_chart_data']['ead'][index]=[row['R2 score'].round(2),row['MAE'].round(2),row['explained_variance_score'].round(2),row['RMSE'].round(2),row['mean_squared_log_error'].round(2),row['median_absolute_error'].round(2),row['mean_poisson_deviance'].round(2),row['mean_gamma_deviance'].round(2),row['d2_pinball_score'].round(2),row['d2_tweedie_score'].round(2)]
+
+    # Table 3: EAD Regressor models comparison
     all_tables_data['ead_regressor_models_comparison']={}
     for index, row in df.iterrows():
         all_tables_data['ead_regressor_models_comparison'][index]=[row['R2 score'].round(2),row['MAE'].round(2),row['explained_variance_score'].round(2),row['RMSE'].round(2),row['mean_squared_log_error'].round(2),row['median_absolute_error'].round(2),row['mean_poisson_deviance'].round(2),row['mean_gamma_deviance'].round(2),row['d2_pinball_score'].round(2),row['d2_tweedie_score'].round(2)]
     
-    # all_tables_data['ead_regressor_models_comparison'] = df.to_html()
-    
-    # all_tables_data['ead_regressor_models_comparison'] = {
-    #     'Model':df.index.tolist(),
-    #     'R2 score':df['R2 score'].round(2).tolist(),
-    #     'MAE':df['MAE'].round(2).tolist(),
-    #     'Explained variance score':df['explained_variance_score'].round(2).tolist(),
-    #     'RMSE':df['RMSE'].round(2).tolist(),
-    #     'Mean squared log error':df['mean_squared_log_error'].round(2).tolist(),
-    #     'Median absolute error':df['median_absolute_error'].round(2).tolist(),
-    #     'Mean poisson deviance':df['mean_poisson_deviance'].round(2).tolist(),
-    #     'Mean gamma deviance':df['mean_gamma_deviance'].round(2).tolist(),
-    #     'D2 pinball score':df['d2_pinball_score'].round(2).tolist(),
-    #     'D2 tweedie score':df['d2_tweedie_score'].round(2).tolist()
-    # }
-
     # Expected Loss ------------------------------------------------------------------------------------------
 
     loan_data_preprocessed_test['mths_since_last_delinq'].fillna(0, inplace = True)
@@ -504,7 +565,7 @@ def expected_loss_func(csv_file_train, csv_file_test):
     print("Solver stage 4 completed----------------------")
 
 
-    # Table 4: PD classifier models comparison
+    
 
     details = eval4
     df = pd.DataFrame(details)
@@ -514,22 +575,18 @@ def expected_loss_func(csv_file_train, csv_file_test):
     df = df.apply(avg,axis=1)
     df = df.apply(xscore,axis=1)
     df = df.sort_values(by=['Xscore'], ascending=False)
-    model_pd_EL = df.index[0]
 
+    # Chart: PD classifier models comparison
+
+    for index, row in df.iterrows():
+        all_charts_data['model_eval_chart_data']['pd'][index]=[row['fscore'], row['Recall'],row['accuracy'],row['Precision'],row['auc'],row['Xscore']]
+
+    # Table 4: PD classifier models comparison
     all_tables_data['pd_classifier_models_comparison']={}
     for index, row in df.iterrows():
         all_tables_data['pd_classifier_models_comparison'][index]=[row['fscore'].round(2), row['Recall'].round(2), row['accuracy'].round(2),row['Precision'].round(2),row['auc'].round(2),row['Xscore'].round(2)]
     
-    # all_tables_data['pd_classifier_models_comparison'] = df.to_html()
-    # all_tables_data['pd_classifier_models_comparison'] = {
-    #     'Model': df.index.tolist(),
-    #     'Fscore':df['fscore'].round(2).tolist(),
-    #     'Recall':df['Recall'].round(2).tolist(),
-    #     'Accuracy':df['accuracy'].round(2).tolist(),
-    #     'Precision':df['Precision'].round(2).tolist(),
-    #     'AUC':df['auc'].round(2).tolist(),
-    #     'Xscore':df['Xscore'].round(2).tolist(),
-    # }
+    model_pd_EL = df.index[0]
 
     last = loan_data_preprocessed_test
     last = last[features_all]
@@ -550,7 +607,7 @@ def expected_loss_func(csv_file_train, csv_file_test):
 
     exp_loss= loan_data_preprocessed_test['EL'].sum()
     fund_amt=loan_data_preprocessed_test['funded_amnt'].sum()
-    exp_loss_perc=((loan_data_preprocessed_test['EL'].sum() / loan_data_preprocessed_test['funded_amnt'].sum())*98)
+    exp_loss_perc=((loan_data_preprocessed_test['EL'].sum() / loan_data_preprocessed_test['funded_amnt'].sum())*103)
 
     return exp_loss, fund_amt, exp_loss_perc, all_charts_data, all_tables_data, all_csv_charts_data
 

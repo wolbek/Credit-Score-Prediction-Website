@@ -46,41 +46,47 @@
         <!-- Tabs -->
         <div class="bank-tabs-container">
             <div class="tab_box">
-                <button class="tab_btn active">CSV Visualization</button>
-                <button class="tab_btn">Model Evaluation Charts</button>
-                <button class="tab_btn">Model Evaluation Tables</button>
+                <button class="tab_btn active">CSV Charts</button>
+                <button class="tab_btn">Probability Of Default</button>
+                <button class="tab_btn">Loss Given Default</button>
+                <button class="tab_btn">Exposure At Default</button>
             </div>
             <div class="content_box">
 
                 <div class="content active">
-                    <h2>CSV Visualization</h2>
+                    <h1>CSV Charts</h1>
+
                     <div id="all-csv-charts">
                         <div id="grade" class="chart"></div>
                         <div id="home-ownership" class="chart"></div>
                         <div id="verification-status" class="chart"></div>
                         <div id="purpose" class="chart"></div>
                         <div id="initial-list-status" class="chart"></div>
+                        <div id="recovery-rate-chart" class="chart"></div>
+                        <div id="ccf-chart" class="chart"></div>
                     </div>
                 </div>
 
                 <div class="content">
-                    <h2>Model Evaluation Charts</h2>
-                    <div id="all-charts">
-                        <div id="model-evaluation-chart"></div>
-                        <div id="actual-predicted-chart" class="chart"></div>
-                        <div id="recovery-rate-chart" class="chart"></div>
-                        <div id="ccf-chart" class="chart"></div>
-                        <div id="roc-chart" class="chart"></div>
-                        <div id="gini-chart" class="chart"></div>
-                        <div id="smirnov-chart" class="chart"></div>
+                    <h1>Probability Of Default</h1>
+
+                    <div class="chart-header-select">
+                        <h3>PD Classifier Models Comparison Chart</h3>
+                        <select id="pd-param-select">
+                            <option selected>fscore</option>
+                            <option>Recall</option>
+                            <option>accuracy</option>
+                            <option>Precision</option>
+                            <option>auc</option>
+                            <option>Xscore</option>
+                        </select>
                     </div>
-                </div>
-                
-                <div class="content">
-                    <h2>Model Evaluation Tables</h2>
-                    <div id="all-classifier-tables">
-                        <table id="pd-classifier-models-comparison">
-                            <caption>PD Classifier Models Comparison</caption>
+                    <div id="pd-param-explanation" class="param-explanation"></div>
+                    <div class="chart-table">
+                        <div id="pd-model-comparison-chart"></div>
+
+                        <table class='green-table' id="pd-model-comparison-table">
+                            <caption>PD Classifier Models Comparison Table</caption>
                             <thead>
                                 <tr>
                                     <td>Model</td>
@@ -88,7 +94,7 @@
                                     <td>Recall</td>
                                     <td>Accuracy</td>
                                     <td>Precision</td>
-                                    <!-- <td>AUC</td> -->
+                                    <td>AUC</td>
                                     <td>Xscore</td>
                                 </tr>
                             </thead>
@@ -100,15 +106,42 @@
                                     <td>{{all_tables_data['pd_classifier_models_comparison'][model][1]}}</td>
                                     <td>{{all_tables_data['pd_classifier_models_comparison'][model][2]}}</td>
                                     <td>{{all_tables_data['pd_classifier_models_comparison'][model][3]}}</td>
-                                    <!-- <td>{{all_tables_data['pd_classifier_models_comparison'][model][4]}}</td> -->
+                                    <td>{{all_tables_data['pd_classifier_models_comparison'][model][4]}}</td>
                                     <td>{{all_tables_data['pd_classifier_models_comparison'][model][5]}}</td>
                                 </tr>
                                 {% endfor %}
                                 
                             </tbody>
                         </table>
-            
-                        <table id="lgd-stage1-classifier-models-comparison">
+                    </div>
+                    
+                    
+                </div>
+
+                <div class="content">
+
+                    <h1>Loss Given Default</h1>
+
+                    <h2>1) LGD Stage 1</h2>
+
+                    <div class="chart-header-select">
+                        <h3>LGD Stage 1 Classifier Models Comparison Chart</h3>
+                        <select id="lgd-stage1-param-select">
+                            <option selected>fscore</option>
+                            <option>Recall</option>
+                            <option>accuracy</option>
+                            <option>Precision</option>
+                            <option>auc</option>
+                            <option>Xscore</option>
+                        </select>
+                    </div>
+
+                    <div id="lgd-stage1-param-explanation" class="param-explanation"></div>
+                    
+                    <div class="chart-table">
+                        <div id="lgd-stage1-model-comparison-chart"></div>
+
+                        <table class='green-table' id="lgd-stage1-model-comparison-table">
                             <caption>LGD Stage 1 Classifier Models Comparison Table</caption>
                             <thead>
                                 <tr>
@@ -117,7 +150,7 @@
                                     <td>Recall</td>
                                     <td>Accuracy</td>
                                     <td>Precision</td>
-                                    <!-- <td>AUC</td> -->
+                                    <td>AUC</td>
                                     <td>Xscore</td>
                                 </tr>
                             </thead>
@@ -129,15 +162,72 @@
                                     <td>{{all_tables_data['lgd_stage1_classifier_models_comparison'][model][1]}}</td>
                                     <td>{{all_tables_data['lgd_stage1_classifier_models_comparison'][model][2]}}</td>
                                     <td>{{all_tables_data['lgd_stage1_classifier_models_comparison'][model][3]}}</td>
-                                    <!-- <td>{{all_tables_data['lgd_stage1_classifier_models_comparison'][model][4]}}</td> -->
+                                    <td>{{all_tables_data['lgd_stage1_classifier_models_comparison'][model][4]}}</td>
                                     <td>{{all_tables_data['lgd_stage1_classifier_models_comparison'][model][5]}}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                    <div id="all-regressor-tables">
-                        <table id="lgd-stage2-regressor-models-comparison">
+
+                    <div class="chart-header-select">
+                        <h3>LGD Stage 1 Other Charts</h3>
+                        <select id="lgd-stage1-model-select">
+                            <option>BernoulliNB</option>
+                            <option>CalibratedClassifierCV</option>
+                            <option>ComplementNB</option>
+                            <option>DecisionTreeClassifier</option>
+                            <option>DummyClassifier</option>
+                            <option>ExtraTreeClassifier</option>
+                            <option>ExtraTreesClassifier</option>
+                            <option>GaussianNB</option>
+                            <option>GradientBoostingClassifier</option>
+                            <option>HistGradientBoostingClassifier</option>
+                            <option>LinearDiscriminantAnalysis</option>
+                            <option>LogisticRegression</option>
+                            <option>LogisticRegressionCV</option>
+                            <option selected>NN</option>
+                            <option>PassiveAggressiveClassifier</option>
+                            <option>QuadraticDiscriminantAnalysis</option>
+                            <option>RandomForestClassifier</option>
+                            <option>RidgeClassifier</option>
+                            <option>RidgeClassifierCV</option>
+                            <option>SGDClassifier</option>
+                            <option>xgb</option>
+                        </select>
+                    </div>
+                    
+                    <div id="lgd-stage1-charts">
+                        <div id="actual-predicted-chart" class="chart"></div>
+                        <div id="roc-chart" class="chart"></div>
+                        <div id="gini-chart" class="chart"></div>
+                        <div id="smirnov-chart" class="chart"></div>
+                    </div>
+
+                    <h2>2) LGD stage 2</h2>
+
+                    <div class="chart-header-select">
+                        <h3>LGD Stage 2 Regressor Models Comparison Chart</h3>
+                        <select id="lgd-stage2-param-select">
+                            <option selected>R2 score</option>
+                            <option>MAE</option>
+                            <option>explained_variance_score</option>
+                            <option>RMSE</option>
+                            <option>mean_squared_log_error</option>
+                            <option>median_absolute_error</option>
+                            <option>mean_poisson_deviance</option>
+                            <option>mean_gamma_deviance</option>
+                            <option>d2_pinball_score</option>
+                            <option>d2_tweedie_score</option>
+                        </select>
+                    </div>
+
+                    <div id="lgd-stage2-param-explanation" class="param-explanation"></div>
+
+                    <div class="chart-table">
+                        <div id="lgd-stage2-model-comparison-chart"></div>
+
+                        <table class='green-table' id="lgd-stage2-model-comparison-table">
                             <caption>LGD Stage2 Regressor Models Comparison Table</caption>
                             <thead>
                                 <tr>
@@ -147,11 +237,11 @@
                                     <td>Explained variance score</td>
                                     <td>RMSE</td>
                                     <td>Mean squared log error</td>
-                                    <!-- <td>Median absolute error</td>
+                                    <td>Median absolute error</td>
                                     <td>Mean poisson deviance</td>
                                     <td>Mean gamma deviance</td>
                                     <td>D2 pinball score</td>
-                                    <td>D2 tweedie score</td> -->
+                                    <td>D2 tweedie score</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -163,18 +253,44 @@
                                     <td>{{all_tables_data['lgd_stage2_regressor_models_comparison'][model][2]}}</td>
                                     <td>{{all_tables_data['lgd_stage2_regressor_models_comparison'][model][3]}}</td>
                                     <td>{{all_tables_data['lgd_stage2_regressor_models_comparison'][model][4]}}</td>
-                                    <!-- <td>{{all_tables_data['lgd_stage2_regressor_models_comparison'][model][5]}}</td>
+                                    <td>{{all_tables_data['lgd_stage2_regressor_models_comparison'][model][5]}}</td>
                                     <td>{{all_tables_data['lgd_stage2_regressor_models_comparison'][model][6]}}</td>
                                     <td>{{all_tables_data['lgd_stage2_regressor_models_comparison'][model][7]}}</td>
                                     <td>{{all_tables_data['lgd_stage2_regressor_models_comparison'][model][8]}}</td>
-                                    <td>{{all_tables_data['lgd_stage2_regressor_models_comparison'][model][9]}}</td> -->
+                                    <td>{{all_tables_data['lgd_stage2_regressor_models_comparison'][model][9]}}</td>
                                 </tr>
                                 {% endfor %}
                                 
                             </tbody>
                         </table>
+                    </div>
+
+                </div>
+                
+                <div class="content">
+                    <h1>Exposure At Default</h1>
+                    <div class="chart-header-select">
+                        <h3>EAD Regressor Models Comparison Chart</h3>
+                        <select id="ead-param-select">
+                            <option selected>R2 score</option>
+                            <option>MAE</option>
+                            <option>explained_variance_score</option>
+                            <option>RMSE</option>
+                            <option>mean_squared_log_error</option>
+                            <option>median_absolute_error</option>
+                            <option>mean_poisson_deviance</option>
+                            <option>mean_gamma_deviance</option>
+                            <option>d2_pinball_score</option>
+                            <option>d2_tweedie_score</option>
+                        </select>
+                    </div>
+
+                    <div id="ead-param-explanation" class="param-explanation"></div>
+
+                    <div class="chart-table">
+                        <div id="ead-model-comparison-chart"></div>
             
-                        <table id="ead-regressor-models-comparison">
+                        <table class='green-table' id="ead-regressor-models-comparison">
                             <caption>EAD Regressor Models Comparison Table</caption>
                             <thead>
                                 <tr>
@@ -184,11 +300,11 @@
                                     <td>Explained variance score</td>
                                     <td>RMSE</td>
                                     <td>Mean squared log error</td>
-                                    <!-- <td>Median absolute error</td>
+                                    <td>Median absolute error</td>
                                     <td>Mean poisson deviance</td>
                                     <td>Mean gamma deviance</td>
                                     <td>D2 pinball score</td>
-                                    <td>D2 tweedie score</td> -->
+                                    <td>D2 tweedie score</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -200,18 +316,20 @@
                                     <td>{{all_tables_data['ead_regressor_models_comparison'][model][2]}}</td>
                                     <td>{{all_tables_data['ead_regressor_models_comparison'][model][3]}}</td>
                                     <td>{{all_tables_data['ead_regressor_models_comparison'][model][4]}}</td>
-                                    <!-- <td>{{all_tables_data['ead_regressor_models_comparison'][model][5]}}</td>
+                                    <td>{{all_tables_data['ead_regressor_models_comparison'][model][5]}}</td>
                                     <td>{{all_tables_data['ead_regressor_models_comparison'][model][6]}}</td>
                                     <td>{{all_tables_data['ead_regressor_models_comparison'][model][7]}}</td>
                                     <td>{{all_tables_data['ead_regressor_models_comparison'][model][8]}}</td>
-                                    <td>{{all_tables_data['ead_regressor_models_comparison'][model][9]}}</td> -->
+                                    <td>{{all_tables_data['ead_regressor_models_comparison'][model][9]}}</td>
                                 </tr>
                                 {% endfor %}
                                 
                             </tbody>
                         </table>
                     </div>
+                    
                 </div>
+
             </div>
         </div>
 
@@ -222,20 +340,20 @@
             <div>
                 <div>Upload old file: &nbsp;<input type="file" accept=".csv" name="csv-file-train" id="csv-file-train" class="upload-btn"/></div>
                 <br>
-                <div id="not-filled-msg">The uploaded file should contain the following columns: </div>
+                <div id="not-filled-msg">The uploaded file should contain the necessary columns.</div>
             </div>
             <br>
             <div>
                 <div>Upload file to predict on: &nbsp; <input type="file" accept=".csv" name="csv-file-test" id="csv-file-test" class="upload-btn"/></div>
                 <br>
-                <div id="not-filled-msg">The uploaded file should contain the following columns: </div>
+                <div id="not-filled-msg">The uploaded file should contain the necessary columns.</div>
             </div>
              <br>
             <button type="submit">Submit</button>
         </form>
         <div id="loading-div" class="center hide" >
             <div class="ring"></div>
-            <span>loading ...</span>
+            <span>loading</span>
         </div>
 
         {% endif %}
@@ -245,7 +363,7 @@
 </main>
 
 <script>
-
+    barColor='#004B49';
     // Remove any other active menu. Active the dashboard menu. Change text at top to Dashboard
     $("a").removeClass("active");
     $("#dashboard").addClass("active");
@@ -400,85 +518,9 @@
 
     Plotly.newPlot('initial-list-status', data, layout);
 
-    data=[]
-    // Chart: Model evaluation Data
+    
 
-    let algos = Object.keys(all_charts_data['model_eval_chart_data']);
-    //Not showing AUC
-    // let param = ['fscore', 'Recall', 'accuracy', 'Precision', 'auc', 'Xscore'];
-    let param = ['fscore', 'Recall', 'accuracy', 'Precision', 'Xscore'];
-    let param_val = [[], [], [], [], []];
-    let bar_color=['#0B6623', '#708238', '#29AB87', '#004B49', '#1C352D']
-
-    algos.forEach(function(algo) {
-        param_val[0].push(all_charts_data['model_eval_chart_data'][algo][0])
-        param_val[1].push(all_charts_data['model_eval_chart_data'][algo][1])
-        param_val[2].push(all_charts_data['model_eval_chart_data'][algo][2])
-        param_val[3].push(all_charts_data['model_eval_chart_data'][algo][3])
-        param_val[4].push(all_charts_data['model_eval_chart_data'][algo][4])
-    });
-
-    for(let i=0;i<param.length;i++){
-        data.push({
-            x: algos,
-            y: param_val[i],
-            name: param[i],
-            type: 'bar',
-            marker: {
-                color: bar_color[i],
-            }
-        })
-    }
-
-    console.log(data);
-
-    layout = {
-        autosize: true,
-        title: 'Model Comparison Chart',
-        xaxis: {
-            title: 'Models',
-            tickangle: 15,
-        },
-        yaxis: {
-            title: '%'
-        },
-        width:1500,
-        height: 700,
-        barmode: 'group',
-    };
-
-    Plotly.newPlot('model-evaluation-chart', data, layout);
-
-    // Chart: Actual Predicted Data
-
-    data = [
-        {
-            z: [all_charts_data['actual_predicted_chart_data'][0],all_charts_data['actual_predicted_chart_data'][1]],
-            type: 'heatmap',
-            colorscale: [
-                [0, '#3D9970'],
-                [1, '#001f3f']
-            ]
-        }
-    ];
-
-    layout = {
-        autosize: true,
-        width:"100%",
-        title: 'Actual Predicted Chart',
-        xaxis: {
-            title: 'Predicted label'
-        },
-        yaxis: {
-            title: 'Actual label'
-        },
-        width: 700,
-        height: 500,
-    };
-
-    Plotly.newPlot('actual-predicted-chart', data, layout);
-
-    // Recovery rate chart 
+    // Chart: Recovery rate
 
     data = [{
         x: all_charts_data['recovery_rate_chart_data'],
@@ -504,7 +546,7 @@
 
     Plotly.newPlot('recovery-rate-chart', data, layout);
 
-    // CCF chart 
+    // Chart: CCF 
 
     data = [{
         x: all_charts_data['ccf_chart_data'],
@@ -530,110 +572,435 @@
 
     Plotly.newPlot('ccf-chart', data, layout);
 
-    // ROC chart
+    // Algos name of all
+    
+    let algosPD = Object.keys(all_charts_data['model_eval_chart_data']['pd']);
+    let algosLgdStage1 = Object.keys(all_charts_data['model_eval_chart_data']['lgd_stage1']);
+    let algosLgdStage2= Object.keys(all_charts_data['model_eval_chart_data']['lgd_stage2']);
+    let algosEad = Object.keys(all_charts_data['model_eval_chart_data']['ead']);
+    
+    // Some functions for charting
 
-    // data for line chart
-    trace1 = {
-        x: all_charts_data['auroc_chart_data']['line_plot'][0],
-        y: all_charts_data['auroc_chart_data']['line_plot'][1],
-        type: 'line'
-    };
+    function classifierParameterData(algos,val_name,param,id_to_change){
+        let i=0;
+        let param_data=[];
+        if(param=='fscore') {
+            i=0;
+            explanation = 'This is a metric that combines precision and recall into a single value. It is calculated as the harmonic mean of the precision and recall, and ranges from 0 to 1, with higher values indicating better model performance.';
+        }
+            
+        else if(param=='Recall'){
+            i=1;
+            explanation = 'This is a metric that measures the proportion of true positive instances that were correctly identified by the model. It is also known as sensitivity, hit rate, or true positive rate.';
+        }
+            
+        else if(param=='accuracy'){
+            i=2;
+            explanation = 'This is a metric that measures the overall correctness of the model\'s predictions, regardless of class. It is calculated as the proportion of correctly classified instances out of all instances in the dataset, and ranges from 0 to 1, with higher values indicating better model performance.';
+        }
+            
+        else if(param=='Precision'){
+            i=3;
+            explanation = 'This is a metric that measures the proportion of predicted positive instances that were correctly identified by the model. It is also known as positive predictive value.';
+        }
+            
+        else if(param=='auc'){
+            i=4;
+            explanation = 'This is the Area Under the ROC Curve, a commonly used metric for evaluating the performance of binary classification models. It measures the trade-off between sensitivity (recall) and specificity.';
+        }
+            
+        else if(param=='Xscore'){
+            i=5;
+            explanation = 'Average Percentage of all the parameters.';
+        }
+            
 
-    // data for scatter chart
-    trace2 = {
-        x: all_charts_data['auroc_chart_data']['dash_plot'][0],
-        y: all_charts_data['auroc_chart_data']['dash_plot'][1],
-        type: 'scatter',
-        mode: 'markers'
-    };
+        algos.forEach(function(algo){
+            param_data.push(all_charts_data['model_eval_chart_data'][val_name][algo][i])
+        })
 
-    layout = {
-        autosize: true,
-        title: 'ROC',
-        xaxis: {
-            title: 'False positive rate'
-        },
-        yaxis: {
-            title: 'True positive rate'
-        },
-        width: 700,
-        height: 500,
-    };
+        $(`#${id_to_change}`).text(explanation);
 
-    data = [trace1, trace2];
-    Plotly.newPlot('roc-chart', data, layout);
+        return param_data;
+    }
+    function regressorParameterData(algos,val_name,param, id_to_change){
+        let i=0;
+        let param_data=[];
+        if(param=='R2 score') {
+            i=0;
+            explanation='It represents the proportion of variance in the dependent variable that can be explained by the independent variables. The score ranges from 0 to 1, with higher values indicating better model fit.';
+        }
+            
+        else if(param=='MAE'){
+            i=1;
+            explanation='This stands for Mean Absolute Error and represents the average magnitude of the errors between the predicted and actual values.';
+        }
+            
+        else if(param=='explained_variance_score'){
+            i=2;
+            explanation=' It represents the proportion of variance in the dependent variable that is explained by the independent variables. Like the R2 score, it ranges from 0 to 1, with higher values indicating better model fit.';
+        }
+            
+        else if(param=='RMSE'){
+            i=3;
+            explanation='This stands for Root Mean Squared Error and represents the square root of the average squared error between the predicted and actual values. ';
+        }
+            
+        else if(param=='mean_squared_log_error'){
+            i=4;
+            explanation='It measures the average squared difference between the logarithm of the predicted and actual values.';
+        }
+            
+        else if(param=='median_absolute_error'){
+            i=5;
+            explanation='It represents the median of the absolute errors between the predicted and actual values.';
+        }
+            
+        else if(param=='mean_poisson_deviance'){
+            i=6;
+            explanation='It measures the average difference between the predicted and actual values in terms of the log-likelihood of the Poisson distribution.';
+        }
+            
+        else if(param=='mean_gamma_deviance'){
+            i=7;
+            explanation='It measures the average difference between the predicted and actual values in terms of the log-likelihood of the Gamma distribution.';
+        }
+            
+        else if(param=='d2_pinball_score'){
+            i=8;
+            explanation='It measures the distance between the predicted and actual quantiles of the target variable.';
+        }
+            
+        else if(param=='d2_tweedie_score'){
+            i=9;
+            explanation='It measures the average difference between the predicted and actual values in terms of the log-likelihood of the Tweedie distribution.';
+        }
+            
 
-    // Gini chart
+        algos.forEach(function(algo){
+            param_data.push(all_charts_data['model_eval_chart_data'][val_name][algo][i])
+        })
+        
+        $(`#${id_to_change}`).text(explanation);
 
-    // data for line chart
-    trace1 = {
-        x: all_charts_data['gini_chart_data']['line_plot'][0],
-        y: all_charts_data['gini_chart_data']['line_plot'][1],
-        type: 'line'
-    };
-
-    // data for scatter chart
-    trace2 = {
-        x: all_charts_data['gini_chart_data']['dash_plot'][0],
-        y: all_charts_data['gini_chart_data']['dash_plot'][1],
-        type: 'scatter',
-        mode: 'markers'
-    };
-
-    layout = {
-        autosize: true,
-        title: 'Gini',
-        xaxis: {
-            title: 'Cumulative % Population'
-        },
-        yaxis: {
-            title: 'Cumulative % Bad'
-        },
-        width: 700,
-        height: 500,
-    };
-
-    data = [trace1, trace2];
-    Plotly.newPlot('gini-chart', data, layout);
+        return param_data;
+    }
 
 
-    // Smirnov Chart
+    // Chart: PD model comparison chart
+    function pdModelComparisonChart(param){
+        data=[{
+            x: algosPD,
+            y: classifierParameterData(algosPD,'pd',param,'pd-param-explanation'),
+            name: 'fscore',
+            type: 'bar',
+            marker: {
+                color: barColor,
+                size: 10
+            }
+        }]
 
-    // data for line chart
-    trace1 = {
-        x: all_charts_data['smirnov_chart_data']['red_plot'][0],
-        y: all_charts_data['smirnov_chart_data']['red_plot'][1],
-        type: 'line',
-        line: {
-            color: 'red' // Set color of bars
-        },
-    };
+        layout = {
+            autosize: true,
+            // title: 'PD Model Comparison Chart',
+            xaxis: {
+                title: 'Models',
+                tickangle: 15,
+            },
+            yaxis: {
+                title: '%'
+            },
+            width:1500,
+            height: 700,
+        };
 
-    // data for scatter chart
-    trace2 = {
-        x: all_charts_data['smirnov_chart_data']['blue_plot'][0],
-        y: all_charts_data['smirnov_chart_data']['blue_plot'][1],
-        type: 'line',
-        line: {
-            color: 'blue' // Set color of bars
-        },
-    };
+        Plotly.newPlot('pd-model-comparison-chart', data, layout);
+    }
+    
+    pdModelComparisonChart('fscore')
 
-    layout = {
-        autosize: true,
-        title: 'Kolmogorov-Smirnov',
-        xaxis: {
-            title: 'Estimated Probability for being Good'
-        },
-        yaxis: {
-            title: 'Cumulative %'
-        },
-        width: 700,
-        height: 500,
-    };
+    $("#pd-param-select").change(function(){
+        pdModelComparisonChart($(this).find(":selected").text())
+    })
 
-    data = [trace1, trace2];
-    Plotly.newPlot('smirnov-chart', data, layout);
+    // Chart: LGD stage1 model comparison chart
+
+    function lgdStage1ModelComparisonChart(param){
+        console.log(algosLgdStage1);
+        console.log(param);
+        data=[{
+            x: algosLgdStage1,
+            y: classifierParameterData(algosLgdStage1,'lgd_stage1',param, 'lgd-stage1-param-explanation'),
+            name: param,
+            type: 'bar',
+            marker: {
+                color: barColor,
+                size: 10
+            }
+        }]
+
+        layout = {
+            autosize: true,
+            // title: 'LGD Stage 1 Model Comparison Chart',
+            xaxis: {
+                title: 'Models',
+                tickangle: 15,
+            },
+            yaxis: {
+                title: '%'
+            },
+            width:1500,
+            height: 700,
+        };
+
+        Plotly.newPlot('lgd-stage1-model-comparison-chart', data, layout);
+    }
+    
+    lgdStage1ModelComparisonChart('fscore');
+
+    $("#lgd-stage1-param-select").change(function(){
+        console.log("Selected");
+        console.log($(this).find(":selected").text());
+        lgdStage1ModelComparisonChart($(this).find(":selected").text());
+    })
+
+    // Chart: LGD stage2 model comparison chart
+
+    function lgdStage2ModelComparisonChart(param){
+        data=[{
+            x: algosLgdStage2,
+            y: regressorParameterData(algosLgdStage2,'lgd_stage2',param, 'lgd-stage2-param-explanation'),
+            name: param,
+            type: 'bar',
+            marker: {
+                color: barColor,
+                size: 10
+            }
+        }]
+
+        layout = {
+            autosize: true,
+            // title: 'LGD Stage 2 Model Comparison Chart',
+            xaxis: {
+                title: 'Models',
+                tickangle: 25,
+            },
+            yaxis: {
+                title: '%'
+            },
+            width:1500,
+            height: 700,
+        };
+
+        Plotly.newPlot('lgd-stage2-model-comparison-chart', data, layout);
+    }
+    
+    lgdStage2ModelComparisonChart('R2 score');
+
+    $("#lgd-stage2-param-select").change(function(){
+        lgdStage2ModelComparisonChart($(this).find(":selected").text());
+    })
+
+    // Chart: EAD model comparison chart
+
+    function eadModelComparisonChart(param){
+        data=[{
+            x: algosEad,
+            y: regressorParameterData(algosEad,'ead',param, 'ead-param-explanation'),
+            name: param,
+            type: 'bar',
+            marker: {
+                color: barColor,
+                size: 10
+            }
+        }]
+
+        layout = {
+            autosize: true,
+            // title: 'EAD Model Comparison Chart',
+            xaxis: {
+                title: 'Models',
+                tickangle: 25,
+            },
+            yaxis: {
+                title: '%'
+            },
+            width:1500,
+            height: 700,
+        };
+
+        Plotly.newPlot('ead-model-comparison-chart', data, layout);
+    }
+    
+    eadModelComparisonChart('R2 score');
+
+    $("#ead-param-select").change(function(){
+        eadModelComparisonChart($(this).find(":selected").text());
+    })
+
+    function lgdStage1Charts(mo){
+
+        // Chart: Actual Predicted Data
+
+        data = [
+            {
+                z: [all_charts_data['actual_predicted_chart_data'][mo][0],all_charts_data['actual_predicted_chart_data'][mo][1]],
+                type: 'heatmap',
+                colorscale: [
+                    [0, '#3D9970'],
+                    [1, '#001f3f']
+                ]
+            }
+        ];
+
+        layout = {
+            autosize: true,
+            width:"100%",
+            title: 'Actual Predicted Chart',
+            xaxis: {
+                title: 'Predicted label'
+            },
+            yaxis: {
+                title: 'Actual label'
+            },
+            width: 700,
+            height: 500,
+        };
+
+        Plotly.newPlot('actual-predicted-chart', data, layout);
+
+        
+
+        // ROC chart
+
+        // data for line chart
+        trace1 = {
+            x: all_charts_data['auroc_chart_data'][mo]['line_plot'][0],
+            y: all_charts_data['auroc_chart_data'][mo]['line_plot'][1],
+            type: 'line'
+        };
+
+        // data for scatter chart
+        trace2 = {
+            x: all_charts_data['auroc_chart_data'][mo]['dash_plot'][0],
+            y: all_charts_data['auroc_chart_data'][mo]['dash_plot'][1],
+            type: 'scatter',
+            mode: 'markers'
+        };
+
+        layout = {
+            autosize: true,
+            title: 'ROC',
+            xaxis: {
+                title: 'False positive rate'
+            },
+            yaxis: {
+                title: 'True positive rate'
+            },
+            width: 700,
+            height: 500,
+        };
+
+        data = [trace1, trace2];
+        Plotly.newPlot('roc-chart', data, layout);
+
+        // Gini chart
+
+        // data for line chart
+        trace1 = {
+            x: all_charts_data['gini_chart_data'][mo]['line_plot'][0],
+            y: all_charts_data['gini_chart_data'][mo]['line_plot'][1],
+            type: 'line'
+        };
+
+        // data for scatter chart
+        trace2 = {
+            x: all_charts_data['gini_chart_data'][mo]['dash_plot'][0],
+            y: all_charts_data['gini_chart_data'][mo]['dash_plot'][1],
+            type: 'scatter',
+            mode: 'markers'
+        };
+
+        layout = {
+            autosize: true,
+            title: 'Gini',
+            xaxis: {
+                title: 'Cumulative % Population'
+            },
+            yaxis: {
+                title: 'Cumulative % Bad'
+            },
+            width: 700,
+            height: 500,
+        };
+
+        data = [trace1, trace2];
+        Plotly.newPlot('gini-chart', data, layout);
+
+
+        // Smirnov Chart
+
+        // data for line chart
+        trace1 = {
+            x: all_charts_data['smirnov_chart_data'][mo]['red_plot'][0],
+            y: all_charts_data['smirnov_chart_data'][mo]['red_plot'][1],
+            type: 'line',
+            line: {
+                color: 'red' // Set color of bars
+            },
+        };
+
+        // data for scatter chart
+        trace2 = {
+            x: all_charts_data['smirnov_chart_data'][mo]['blue_plot'][0],
+            y: all_charts_data['smirnov_chart_data'][mo]['blue_plot'][1],
+            type: 'line',
+            line: {
+                color: 'blue' // Set color of bars
+            },
+        };
+
+        layout = {
+            autosize: true,
+            title: 'Kolmogorov-Smirnov',
+            xaxis: {
+                title: 'Estimated Probability for being Good'
+            },
+            yaxis: {
+                title: 'Cumulative %'
+            },
+            width: 700,
+            height: 500,
+        };
+
+        data = [trace1, trace2];
+        Plotly.newPlot('smirnov-chart', data, layout);
+    }
+
+    lgdStage1Charts('NN');
+
+    $("#lgd-stage1-model-select").change(function(){
+        lgdStage1Charts($(this).find(":selected").text());
+
+        // let mo=$(this).find(":selected").text();
+        // Plotly.update('actual-predicted-chart', {
+        //     z: [all_charts_data['actual_predicted_chart_data'][mo][0],all_charts_data['actual_predicted_chart_data'][mo][1]]
+        // });
+        // Plotly.update('roc-chart', {
+        //     x: [response.x],  // Update the x values
+        //     y: [response.y]   // Update the y values
+        // });
+        // Plotly.update('chart', {
+        //     x: [response.x],  // Update the x values
+        //     y: [response.y]   // Update the y values
+        // });
+        // Plotly.update('chart', {
+        //     x: [response.x],  // Update the x values
+        //     y: [response.y]   // Update the y values
+        // });
+    })
+
+    
 
     "{% endif %}"
     });

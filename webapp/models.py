@@ -38,19 +38,28 @@ class CreditDetails(db.Model):
 
     purpose = db.Column(db.String(50), nullable=False, server_default='')
     initial_list_status= db.Column(db.String(5), nullable=False, server_default='')
-    term = db.Column(db.String(50), nullable=False, server_default='')
 
-    emp_length = db.Column(db.String(50), nullable=False, server_default='')
+    term = db.Column(db.Float, nullable=False, default=0)
 
-    mths_since_issue_d = db.Column(db.String(50), nullable=False, server_default='')
-    int_rate = db.Column(db.String(50), nullable=False, server_default='')
-    mths_since_earliest_cr_line = db.Column(db.String(50), nullable=False, server_default='')
-    inq_last_6mths = db.Column(db.String(50), nullable=False, server_default='')
-    acc_now_delinq = db.Column(db.String(50), nullable=False, server_default='')
-    annual_inc = db.Column(db.String(50), nullable=False, server_default='')
-    dti = db.Column(db.String(50), nullable=False, server_default='')
-    mths_since_last_delinq = db.Column(db.String(50), nullable=False, server_default='')
-    mths_since_last_record = db.Column(db.String(50), nullable=False, server_default='')
+    emp_length = db.Column(db.Float, nullable=False, default=0)
+
+    mths_since_issue_d = db.Column(db.Float, nullable=False, default=0)
+    int_rate = db.Column(db.Float, nullable=False, default=0)
+    mths_since_earliest_cr_line = db.Column(db.Float, nullable=False, default=0)
+    inq_last_6mths = db.Column(db.Float, nullable=False, default=0)
+    acc_now_delinq = db.Column(db.Float, nullable=False, default=0)
+    annual_inc = db.Column(db.Float, nullable=False, default=0)
+    dti = db.Column(db.Float, nullable=False, default=0)
+    mths_since_last_delinq = db.Column(db.Float, nullable=False, default=0)
+    mths_since_last_record = db.Column(db.Float, nullable=False, default=0)
+
+    installment = db.Column(db.Float, nullable=False, default=0)
+    funded_amnt = db.Column(db.Float, nullable=False, default=0)
+    delinq_2yrs = db.Column(db.Float, nullable=False, default=0)
+    open_acc = db.Column(db.Float, nullable=False, default=0)
+    pub_rec = db.Column(db.Float, nullable=False, default=0)
+    total_acc = db.Column(db.Float, nullable=False, default=0)
+    total_rev_hi_lim = db.Column(db.Float, nullable=False, default=0)
 
 @click.command('init-db')
 @with_appcontext
