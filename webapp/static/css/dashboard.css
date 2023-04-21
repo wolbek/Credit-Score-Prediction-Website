@@ -467,7 +467,7 @@ select{
     border-collapse: collapse;
     margin: 25px 0;
     font-size:0.9em;
-    width: 49%;
+    width: 70%;
     background-color: white;
     border-radius: 0px 0px 20px 20px;
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
@@ -504,6 +504,13 @@ select{
     margin-bottom: 15px;
 }
 
+#all-csv-charts > div, #lgd-stage1-charts > div{
+    width: 50%;
+}
+
+#all-csv-charts p, #lgd-stage1-charts p {
+    text-align: center;
+}
 
 /* Loader */
 .center{
@@ -678,4 +685,8 @@ select{
 .param-explanation{
     /* text-align: center; */
     margin: 12px 20px 0px 20px;
+}
+
+.chart-info, .term-info{
+    font-style: italic;
 }

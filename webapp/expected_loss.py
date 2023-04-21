@@ -128,13 +128,10 @@ def avg(row):
 
 def expected_loss_func(csv_file_train, csv_file_test):
     print("Started-------------------------")
-    # loan_data_preprocessed_train = pd.read_csv(csv_file_train)
-    # Can write code for train data preprocessing and fitting.
-    # ...
 
-    loan_data_preprocessed_test = pd.read_csv(csv_file_test)
+    loan_data_preprocessed_train = pd.read_csv(csv_file_train)
     # Code for test data preprocessing and prediction on test data
-    loan_data_defaults = loan_data_preprocessed_test[loan_data_preprocessed_test['loan_status'].isin(['Charged Off','Does not meet the credit policy. Status:Charged Off'])]
+    loan_data_defaults = loan_data_preprocessed_train[loan_data_preprocessed_train['loan_status'].isin(['Charged Off','Does not meet the credit policy. Status:Charged Off'])]
 
     # fill the missing values with zeroes
     loan_data_defaults['mths_since_last_delinq'].fillna(0, inplace = True)
@@ -302,14 +299,14 @@ def expected_loss_func(csv_file_train, csv_file_test):
     }
 
     for index, row in df.iterrows():
-        all_charts_data['model_eval_chart_data']['lgd_stage1'][index]=[row['fscore'], row['Recall'],row['accuracy'],row['Precision'],row['auc'],row['Xscore']]
+        all_charts_data['model_eval_chart_data']['lgd_stage1'][index]=[row['fscore']*100, row['Recall']*100,row['accuracy']*100,row['Precision']*100,row['auc']*100,row['Xscore']]
 
     # Table 1: LGD stage 1 Classifier Models comparison
 
     all_tables_data['lgd_stage1_classifier_models_comparison']={}
 
     for index, row in df.iterrows():
-        all_tables_data['lgd_stage1_classifier_models_comparison'][index]=[row['fscore'].round(2), row['Recall'].round(2), row['accuracy'].round(2),row['Precision'].round(2),row['auc'].round(2),row['Xscore'].round(2)]
+        all_tables_data['lgd_stage1_classifier_models_comparison'][index]=[(row['fscore']*100).round(2), (row['Recall']*100).round(2), (row['accuracy']*100).round(2),(row['Precision']*100).round(2),(row['auc']*100).round(2),row['Xscore'].round(2)]
 
     model_pd = df.index[0]
     best_stage1 = sol1.models_data[df.index[0]]['df_preds']['y_hat_test_lgd_stage_1']
@@ -540,22 +537,22 @@ def expected_loss_func(csv_file_train, csv_file_test):
     
     # Expected Loss ------------------------------------------------------------------------------------------
 
-    loan_data_preprocessed_test['mths_since_last_delinq'].fillna(0, inplace = True)
-    loan_data_preprocessed_test['mths_since_last_record'].fillna(0, inplace = True)
-    loan_data_preprocessed_lgd_ead = loan_data_preprocessed_test[features_all]
+    loan_data_preprocessed_train['mths_since_last_delinq'].fillna(0, inplace = True)
+    loan_data_preprocessed_train['mths_since_last_record'].fillna(0, inplace = True)
+    loan_data_preprocessed_lgd_ead = loan_data_preprocessed_train[features_all]
     loan_data_preprocessed_lgd_ead = loan_data_preprocessed_lgd_ead.drop(features_reference_cat, axis = 1)
-    loan_data_preprocessed_test['recovery_rate_st_1'] = sol1.models[model_pd].predict(loan_data_preprocessed_lgd_ead)
-    loan_data_preprocessed_test['recovery_rate_st_2'] = sol2.models[model_reg].predict(loan_data_preprocessed_lgd_ead)
-    loan_data_preprocessed_test['recovery_rate'] = loan_data_preprocessed_test['recovery_rate_st_1'] * loan_data_preprocessed_test['recovery_rate_st_2']
-    loan_data_preprocessed_test['recovery_rate'] = np.where(loan_data_preprocessed_test['recovery_rate'] < 0, 0, loan_data_preprocessed_test['recovery_rate'])
-    loan_data_preprocessed_test['recovery_rate'] = np.where(loan_data_preprocessed_test['recovery_rate'] > 1, 1, loan_data_preprocessed_test['recovery_rate'])
-    loan_data_preprocessed_test['LGD'] = 1 - loan_data_preprocessed_test['recovery_rate']
-    loan_data_preprocessed_test['CCF'] = sol3.models[model_ead].predict(loan_data_preprocessed_lgd_ead)
-    loan_data_preprocessed_test['CCF'] = np.where(loan_data_preprocessed_test['CCF'] < 0, 0, loan_data_preprocessed_test['CCF'])
-    loan_data_preprocessed_test['CCF'] = np.where(loan_data_preprocessed_test['CCF'] > 1, 1, loan_data_preprocessed_test['CCF'])
-    loan_data_preprocessed_test['EAD'] = loan_data_preprocessed_test['CCF'] * loan_data_preprocessed_lgd_ead['funded_amnt']
+    loan_data_preprocessed_train['recovery_rate_st_1'] = sol1.models[model_pd].predict(loan_data_preprocessed_lgd_ead)
+    loan_data_preprocessed_train['recovery_rate_st_2'] = sol2.models[model_reg].predict(loan_data_preprocessed_lgd_ead)
+    loan_data_preprocessed_train['recovery_rate'] = loan_data_preprocessed_train['recovery_rate_st_1'] * loan_data_preprocessed_train['recovery_rate_st_2']
+    loan_data_preprocessed_train['recovery_rate'] = np.where(loan_data_preprocessed_train['recovery_rate'] < 0, 0, loan_data_preprocessed_train['recovery_rate'])
+    loan_data_preprocessed_train['recovery_rate'] = np.where(loan_data_preprocessed_train['recovery_rate'] > 1, 1, loan_data_preprocessed_train['recovery_rate'])
+    loan_data_preprocessed_train['LGD'] = 1 - loan_data_preprocessed_train['recovery_rate']
+    loan_data_preprocessed_train['CCF'] = sol3.models[model_ead].predict(loan_data_preprocessed_lgd_ead)
+    loan_data_preprocessed_train['CCF'] = np.where(loan_data_preprocessed_train['CCF'] < 0, 0, loan_data_preprocessed_train['CCF'])
+    loan_data_preprocessed_train['CCF'] = np.where(loan_data_preprocessed_train['CCF'] > 1, 1, loan_data_preprocessed_train['CCF'])
+    loan_data_preprocessed_train['EAD'] = loan_data_preprocessed_train['CCF'] * loan_data_preprocessed_lgd_ead['funded_amnt']
 
-    X_train, x_test, Y_train, y_test = train_test_split(loan_data_preprocessed_test.drop(['good_bad'], axis = 1), loan_data_preprocessed_test['good_bad'], test_size = 0.2, random_state = 42)
+    X_train, x_test, Y_train, y_test = train_test_split(loan_data_preprocessed_train.drop(['good_bad'], axis = 1), loan_data_preprocessed_train['good_bad'], test_size = 0.2, random_state = 42)
 
     x_test = x_test[features_all]
     x_test = x_test.drop(features_reference_cat, axis = 1)
@@ -579,37 +576,38 @@ def expected_loss_func(csv_file_train, csv_file_test):
     # Chart: PD classifier models comparison
 
     for index, row in df.iterrows():
-        all_charts_data['model_eval_chart_data']['pd'][index]=[row['fscore'], row['Recall'],row['accuracy'],row['Precision'],row['auc'],row['Xscore']]
+        all_charts_data['model_eval_chart_data']['pd'][index]=[row['fscore']*100, row['Recall']*100,row['accuracy']*100,row['Precision']*100,row['auc']*100,row['Xscore']]
 
     # Table 4: PD classifier models comparison
     all_tables_data['pd_classifier_models_comparison']={}
     for index, row in df.iterrows():
-        all_tables_data['pd_classifier_models_comparison'][index]=[row['fscore'].round(2), row['Recall'].round(2), row['accuracy'].round(2),row['Precision'].round(2),row['auc'].round(2),row['Xscore'].round(2)]
+        all_tables_data['pd_classifier_models_comparison'][index]=[(row['fscore']*100).round(2), (row['Recall']*100).round(2), (row['accuracy']*100).round(2),(row['Precision']*100).round(2),(row['auc']*100).round(2),row['Xscore'].round(2)]
     
     model_pd_EL = df.index[0]
 
-    last = loan_data_preprocessed_test
+    last = loan_data_preprocessed_train
     last = last[features_all]
     last = last.drop(features_reference_cat, axis = 1)
 
 
     if model_pd_EL == 'NN':
-        loan_data_preprocessed_test['PD'] = sol4.models[model_pd_EL].predict(last)
+        loan_data_preprocessed_train['PD'] = sol4.models[model_pd_EL].predict(last)
     else:
-        loan_data_preprocessed_test['PD'] = sol4.models[model_pd_EL].predict_proba(last)[: ][: , 0]
+        loan_data_preprocessed_train['PD'] = sol4.models[model_pd_EL].predict_proba(last)[: ][: , 0]
 
 
     # Table 5: Funded amount, PD, LGD, EAD, EL of all accounts 
-    loan_data_preprocessed_test['EL'] = loan_data_preprocessed_test['PD'] * loan_data_preprocessed_test['LGD'] * loan_data_preprocessed_test['EAD']
-    # all_tables_data['amount_PD_LGD_EAD_EL']=loan_data_preprocessed_test[['funded_amnt', 'PD', 'LGD', 'EAD', 'EL']].to_html()
+    loan_data_preprocessed_train['EL'] = loan_data_preprocessed_train['PD'] * loan_data_preprocessed_train['LGD'] * loan_data_preprocessed_train['EAD']
+    # all_tables_data['amount_PD_LGD_EAD_EL']=loan_data_preprocessed_train[['funded_amnt', 'PD', 'LGD', 'EAD', 'EL']].to_html()
     
-    print(loan_data_preprocessed_test.head(10))
+    print(loan_data_preprocessed_train.head(10))
 
-    exp_loss= loan_data_preprocessed_test['EL'].sum()
-    fund_amt=loan_data_preprocessed_test['funded_amnt'].sum()
-    exp_loss_perc=((loan_data_preprocessed_test['EL'].sum() / loan_data_preprocessed_test['funded_amnt'].sum())*103)
+    exp_loss= loan_data_preprocessed_train['EL'].sum()
+    fund_amt=loan_data_preprocessed_train['funded_amnt'].sum()
+    exp_loss_perc=((loan_data_preprocessed_train['EL'].sum() / loan_data_preprocessed_train['funded_amnt'].sum())*101)
 
     return exp_loss, fund_amt, exp_loss_perc, all_charts_data, all_tables_data, all_csv_charts_data
+
 
 
 

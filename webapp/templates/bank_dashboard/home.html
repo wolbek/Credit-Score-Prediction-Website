@@ -57,13 +57,32 @@
                     <h1>CSV Charts</h1>
 
                     <div id="all-csv-charts">
-                        <div id="grade" class="chart"></div>
-                        <div id="home-ownership" class="chart"></div>
-                        <div id="verification-status" class="chart"></div>
-                        <div id="purpose" class="chart"></div>
-                        <div id="initial-list-status" class="chart"></div>
-                        <div id="recovery-rate-chart" class="chart"></div>
-                        <div id="ccf-chart" class="chart"></div>
+                        <div>
+                            <div id="grade" class="chart"></div>
+                            <p class="chart-info">Shows the assigned loan grade based on the borrower's creditworthiness by the bank.</p>
+                        </div>
+                        <div>
+                            <div id="home-ownership" class="chart"></div>
+                            <p class="chart-info">Shows the home ownership status provided by the borrower during registration.</p>
+                        </div>
+                        <div>
+                            <div id="verification-status" class="chart"></div>
+                            <p class="chart-info">Shows the status of an applicant's information, indicating whether or not it has been verified for accuracy by the lender or a third-party source.</p>
+                        </div>
+                        <div>
+                            <div id="purpose" class="chart"></div>
+                            <p class="chart-info">Shows the category provided by the borrower for the loan request. </p>
+                        </div>
+                        <div>
+                            <div id="recovery-rate-chart" class="chart"></div>
+                            <p class="chart-info">Shows the percentage of a defaulted loan that is ultimately recovered by the lender.</p>
+                        </div>
+                        <div>
+                            <div id="ccf-chart" class="chart"></div>
+                            <p class="chart-info">Shows the potential credit losses that may arise from a bank's exposure to different types of credit risk.</p>
+                        </div>
+                        
+                        <!-- <div id="initial-list-status" class="chart"></div> -->
                     </div>
                 </div>
 
@@ -81,7 +100,7 @@
                             <option>Xscore</option>
                         </select>
                     </div>
-                    <div id="pd-param-explanation" class="param-explanation"></div>
+                    <div id="pd-param-explanation" class="param-explanation chart-info"></div>
                     <div class="chart-table">
                         <div id="pd-model-comparison-chart"></div>
 
@@ -90,12 +109,12 @@
                             <thead>
                                 <tr>
                                     <td>Model</td>
-                                    <td>Fscore</td>
-                                    <td>Recall</td>
-                                    <td>Accuracy</td>
-                                    <td>Precision</td>
-                                    <td>AUC</td>
-                                    <td>Xscore</td>
+                                    <td>Fscore (in %)</td>
+                                    <td>Recall (in %)</td>
+                                    <td>Accuracy (in %)</td>
+                                    <td>Precision (in %)</td>
+                                    <td>AUC (in %)</td>
+                                    <td>Xscore (in %)</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -136,7 +155,7 @@
                         </select>
                     </div>
 
-                    <div id="lgd-stage1-param-explanation" class="param-explanation"></div>
+                    <div id="lgd-stage1-param-explanation" class="param-explanation chart-info"></div>
                     
                     <div class="chart-table">
                         <div id="lgd-stage1-model-comparison-chart"></div>
@@ -146,12 +165,12 @@
                             <thead>
                                 <tr>
                                     <td>Model</td>
-                                    <td>Fscore</td>
-                                    <td>Recall</td>
-                                    <td>Accuracy</td>
-                                    <td>Precision</td>
-                                    <td>AUC</td>
-                                    <td>Xscore</td>
+                                    <td>Fscore (in %)</td>
+                                    <td>Recall (in %)</td>
+                                    <td>Accuracy (in %)</td>
+                                    <td>Precision (in %)</td>
+                                    <td>AUC (in %)</td>
+                                    <td>Xscore (in %)</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -171,7 +190,7 @@
                     </div>
 
                     <div class="chart-header-select">
-                        <h3>LGD Stage 1 Other Charts</h3>
+                        <h3>Evaluation Metrics</h3>
                         <select id="lgd-stage1-model-select">
                             <option>BernoulliNB</option>
                             <option>CalibratedClassifierCV</option>
@@ -198,11 +217,26 @@
                     </div>
                     
                     <div id="lgd-stage1-charts">
-                        <div id="actual-predicted-chart" class="chart"></div>
-                        <div id="roc-chart" class="chart"></div>
-                        <div id="gini-chart" class="chart"></div>
-                        <div id="smirnov-chart" class="chart"></div>
+                        <div>
+                            <div id="actual-predicted-chart" class="chart"></div>
+                            <p class="chart-info">Shows the performance of a classification model by comparing the predicted and actual values of the target variable.</p>
+                        </div>
+                        <div>
+                            <div id="roc-chart" class="chart"></div>
+                            <p class="chart-info">Shows the performance of a binary classification model at different classification thresholds.</p>
+                        </div>
+                        <div>
+                            <div id="gini-chart" class="chart"></div>
+                            <p class="chart-info">Shows the performance of binary classification models with higher values indicating better performance.</p>
+                        </div>
+                        <div>
+                            <div id="smirnov-chart" class="chart"></div>
+                            <p class="chart-info">Shows if the two datasets are significantly different from each other.</p>
+                        </div>
                     </div>
+
+                    <br>
+                    <br>
 
                     <h2>2) LGD stage 2</h2>
 
@@ -222,7 +256,7 @@
                         </select>
                     </div>
 
-                    <div id="lgd-stage2-param-explanation" class="param-explanation"></div>
+                    <div id="lgd-stage2-param-explanation" class="param-explanation chart-info"></div>
 
                     <div class="chart-table">
                         <div id="lgd-stage2-model-comparison-chart"></div>
@@ -269,6 +303,7 @@
                 
                 <div class="content">
                     <h1>Exposure At Default</h1>
+               
                     <div class="chart-header-select">
                         <h3>EAD Regressor Models Comparison Chart</h3>
                         <select id="ead-param-select">
@@ -285,7 +320,7 @@
                         </select>
                     </div>
 
-                    <div id="ead-param-explanation" class="param-explanation"></div>
+                    <div id="ead-param-explanation" class="param-explanation chart-info"></div>
 
                     <div class="chart-table">
                         <div id="ead-model-comparison-chart"></div>
@@ -340,13 +375,13 @@
             <div>
                 <div>Upload old file: &nbsp;<input type="file" accept=".csv" name="csv-file-train" id="csv-file-train" class="upload-btn"/></div>
                 <br>
-                <div id="not-filled-msg">The uploaded file should contain the necessary columns.</div>
+                <div id="not-filled-msg">The uploaded file should contain the necessary columns. <a href="{{ url_for('static', filename='required_columns.xlsx') }}">See here.</a></div>
             </div>
             <br>
             <div>
                 <div>Upload file to predict on: &nbsp; <input type="file" accept=".csv" name="csv-file-test" id="csv-file-test" class="upload-btn"/></div>
                 <br>
-                <div id="not-filled-msg">The uploaded file should contain the necessary columns.</div>
+                <div id="not-filled-msg">The uploaded file should contain the necessary columns. Same as above.</div>
             </div>
              <br>
             <button type="submit">Submit</button>
@@ -396,6 +431,7 @@
     })
 
     let data=[];
+    let layout={};
 
     $(document).ready(function() {
        
@@ -498,25 +534,25 @@
 
     // Chart: Initial list status
     
-    data = [{
-        labels: all_csv_charts_data['initial_list_status']['type'],
-        values: all_csv_charts_data['initial_list_status']['count'],
-        type: 'pie',
-        marker: {
-            colors: ['#0B6623', '#708238']
-        },
-        textfont: {
-            color: 'white'
-        }
-    }];
+    // data = [{
+    //     labels: all_csv_charts_data['initial_list_status']['type'],
+    //     values: all_csv_charts_data['initial_list_status']['count'],
+    //     type: 'pie',
+    //     marker: {
+    //         colors: ['#0B6623', '#708238']
+    //     },
+    //     textfont: {
+    //         color: 'white'
+    //     }
+    // }];
 
-    layout = {
-        title: 'Initial List Status Distribution',
-        width: 700,
-        height: 500,
-    };
+    // layout = {
+    //     title: 'Initial List Status Distribution',
+    //     width: 700,
+    //     height: 500,
+    // };
 
-    Plotly.newPlot('initial-list-status', data, layout);
+    // Plotly.newPlot('initial-list-status', data, layout);
 
     
 
@@ -717,11 +753,59 @@
         Plotly.newPlot('pd-model-comparison-chart', data, layout);
     }
     
-    pdModelComparisonChart('fscore')
+    pdModelComparisonChart('fscore');
 
     $("#pd-param-select").change(function(){
         pdModelComparisonChart($(this).find(":selected").text())
     })
+
+    // data=[];
+    // let algos = Object.keys(all_charts_data['model_eval_chart_data']['pd']);
+
+    // let param = ['fscore', 'Recall', 'accuracy', 'Precision', 'auc', 'Xscore'];
+    // let param_val = [[], [], [], [], [], []];
+    // // let bar_color=['#0B6623', '#708238', '#29AB87', '#004B49', '#1C352D', '#1A2421']
+    // let bar_color=['rgb(26, 118, 255)', 'rgb(55, 83, 109)', 'rgb(34,139,34)', 'rgb(255,140,0)', 'rgb(148,0,211)', 'rgb(255,0,0)']
+
+    // algos.forEach(function(algo) {
+    //     param_val[0].push(all_charts_data['model_eval_chart_data']['pd'][algo][0])
+    //     param_val[1].push(all_charts_data['model_eval_chart_data']['pd'][algo][1])
+    //     param_val[2].push(all_charts_data['model_eval_chart_data']['pd'][algo][2])
+    //     param_val[3].push(all_charts_data['model_eval_chart_data']['pd'][algo][3])
+    //     param_val[4].push(all_charts_data['model_eval_chart_data']['pd'][algo][4])
+    //     param_val[5].push(all_charts_data['model_eval_chart_data']['pd'][algo][5])
+    // });
+
+    // for(let i=0;i<param.length;i++){
+    //     data.push({
+    //         x: algos,
+    //         y: param_val[i],
+    //         name: param[i],
+    //         type: 'bar',
+    //         marker: {
+    //             color: bar_color[i],
+    //         }
+    //     })
+    // }
+
+    // console.log(data);
+
+    // layout = {
+    //     autosize: true,
+    //     title: 'PD Model Comparison Chart',
+    //     xaxis: {
+    //         title: 'Models',
+    //         tickangle: 15,
+    //     },
+    //     yaxis: {
+    //         title: '%'
+    //     },
+    //     barmode: 'group',
+    //     width:1200,
+    //     height: 700,
+    // };
+
+    // Plotly.newPlot('pd-model-comparison-chart', data, layout);
 
     // Chart: LGD stage1 model comparison chart
 
@@ -785,9 +869,9 @@
                 title: 'Models',
                 tickangle: 25,
             },
-            yaxis: {
-                title: '%'
-            },
+            // yaxis: {
+            //     title: '%'
+            // },
             width:1500,
             height: 700,
         };
@@ -822,9 +906,9 @@
                 title: 'Models',
                 tickangle: 25,
             },
-            yaxis: {
-                title: '%'
-            },
+            // yaxis: {
+            //     title: '%'
+            // },
             width:1500,
             height: 700,
         };

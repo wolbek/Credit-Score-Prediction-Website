@@ -7,22 +7,13 @@ from flask_login import current_user, login_required, login_user, logout_user
 from .expected_loss import expected_loss_func
 from flask import Flask, send_file
 import pickle
-
+from flask import Flask, send_from_directory, make_response
 import io
-# import pickle
 import joblib
 import numpy as np
 import pandas as pd
 import os
-# from sklearn.linear_model import LogisticRegression
-# from sklearn import metrics
-# from sklearn import linear_model
-# import scipy.stats as stat
 from webapp.global_constants import grade, home_ownership, verification_status, purpose, initial_list_status
-# addr_state, term, emp_length, mths_since_issue_d, int_rate, mths_since_earliest_cr_line, inq_last_6mths, acc_now_delinq, annual_inc, dti, mths_since_last_delinq, mths_since_last_record
-
-# from urllib import request
-# from sklearn.linear_model import LogisticRegression
 
 @app.route("/")
 def home():
@@ -78,12 +69,11 @@ def logout():
 @login_required
 def user_dashboard_home():
     credit_score=0
-    prob_of_default=0
+    prob_of_default=[0]
 
     credit_details=CreditDetails.query.filter_by(user_id=current_user.user_id).first()
 
     # Let's test the loaded model on a dummy user credit details. This is the input.
-
     if credit_details:
         x_test = pd.DataFrame({
         'grade': [credit_details.grade],
@@ -92,8 +82,6 @@ def user_dashboard_home():
         'purpose': [credit_details.purpose],
         'initial_list_status': [credit_details.initial_list_status],
         })
-        # 'addr_state': [credit_details.addr_state],
-
 
         # Creating a dictionary containing all the columns with their values according to credit details
 
@@ -102,56 +90,13 @@ def user_dashboard_home():
             x_test["grade:"+i] = [1] if credit_details.grade==i else [0]
         for i in home_ownership:
             x_test["home_ownership:"+i] = [1] if credit_details.home_ownership==i else [0]
-        # for i in addr_state:
-        #     x_test["addr_state:"+i] = [1] if credit_details.addr_state==i else [0]
         for i in verification_status:
             x_test["verification_status:"+i] = [1] if credit_details.verification_status==i else [0]
         for i in purpose:
             x_test["purpose:"+i] = [1] if credit_details.purpose==i else [0]
         for i in initial_list_status:
             x_test["initial_list_status:"+i] = [1] if credit_details.initial_list_status==i else [0]
-        # for i in term:
-        #     x_test["term:"+i] = [1] if credit_details.term==i else [0]
-        # for i in emp_length:
-        #     x_test["emp_length:"+i] = [1] if credit_details.emp_length==i else [0]
-        # for i in mths_since_issue_d:
-        #     x_test["mths_since_issue_d:"+i] = [1] if credit_details.mths_since_issue_d==i else [0]
-        # for i in int_rate:
-        #     x_test["int_rate:"+i] = [1] if credit_details.int_rate==i else [0]
-        # for i in mths_since_earliest_cr_line:
-        #     x_test["mths_since_earliest_cr_line:"+i] = [1] if credit_details.mths_since_earliest_cr_line==i else [0]
-        # for i in inq_last_6mths:
-        #     x_test["inq_last_6mths:"+i] = [1] if credit_details.inq_last_6mths==i else [0]
-        # for i in acc_now_delinq:
-        #     x_test["acc_now_delinq:"+i] = [1] if credit_details.acc_now_delinq==i else [0]
-        # for i in annual_inc:
-        #     x_test["annual_inc:"+i] = [1] if credit_details.annual_inc==i else [0]
-        # for i in dti:
-        #     x_test["dti:"+i] = [1] if credit_details.dti==i else [0]
-        # for i in mths_since_last_delinq:
-        #     x_test["mths_since_last_delinq:"+i] = [1] if credit_details.mths_since_last_delinq==i else [0]
-        # for i in mths_since_last_record:
-        #     x_test["mths_since_last_record:"+i] = [1] if credit_details.mths_since_last_record==i else [0]
-        # print(x_test)
-
-        # Saving ref_categories in a variable and will use later
-        # ref_categories = ['grade:G',
-        # 'home_ownership:RENT_OTHER_NONE_ANY',
-        # 'addr_state:ND_NE_IA_NV_FL_HI_AL',
-        # 'verification_status:Verified',
-        # 'purpose:educ__sm_b__wedd__ren_en__mov__house',
-        # 'initial_list_status:f',
-        # 'term:60',
-        # 'emp_length:0',
-        # 'mths_since_issue_d:>84',
-        # 'int_rate:>20.281',
-        # 'mths_since_earliest_cr_line:<140',
-        # 'inq_last_6mths:>6',
-        # 'acc_now_delinq:0',
-        # 'annual_inc:<20K',
-        # 'dti:>35',
-        # 'mths_since_last_delinq:0-3',
-        # 'mths_since_last_record:0-2']
+        print("Working - 1")
 
         x_test.update({
         'term_int': [credit_details.term],
@@ -179,6 +124,7 @@ def user_dashboard_home():
         'verification_status:Verified',
         'purpose:credit_card',
         'initial_list_status:f']
+
         # Converting x_test dictionary to dataframe
         
 
@@ -187,76 +133,14 @@ def user_dashboard_home():
         for key in inputs_without_ref_cat:
             print(key)
         print(len(inputs_without_ref_cat))
-        # filename='model.sav'
-        # path = os.path.join(app.config['UPLOAD_FOLDER'][0], filename)
-        # loaded_model = joblib.load(path)
-        # prediction = loaded_model.model.predict(inputs_without_ref_cat)
-        # print(prediction)
+       
         loaded_model = pickle.load(open(os.path.join(app.config['UPLOAD_FOLDER'][0], 'solver_stage4_models', 'xgb.pkl'), 'rb'))
         prob_of_default= loaded_model.predict_proba(inputs_without_ref_cat)[: ][: , 0]
         print(prob_of_default)
-        # Storing feature names with their coefficients (using loaded_model.coef_) in summary_table
-        # feature_name = inputs_without_ref_cat.columns.values
-        # summary_table = pd.DataFrame(columns = ['Feature name'], data = feature_name)
-        # summary_table['Coefficients'] = np.transpose(loaded_model.coef_)
-        # summary_table.index = summary_table.index + 1
-        # summary_table.loc[0] = ['Intercept', loaded_model.intercept_[0]]
-        # summary_table = summary_table.sort_index()
-        # # Storing p_values in summary table
-        # p_values = loaded_model.p_values
-        # p_values = np.append(np.nan,np.array(p_values))
-        # summary_table['p_values'] = p_values
-
-        # We were not allowed to include the reference categories when estimating the model. However when using the model for probability of default, we just take their coefficients as 0, and p_values as nan, in order to make thee scorecard interpretable for normal person
-        # Need to store reference categories in summary table so we do this:
-
-        # df_ref_categories = pd.DataFrame(ref_categories, columns = ['Feature name'])
-        # df_ref_categories['Coefficients'] = 0
-        # df_ref_categories['p_values'] = np.nan
-        # df_scorecard = pd.concat([summary_table, df_ref_categories])
-        # df_scorecard = df_scorecard.reset_index()
-        # df_scorecard['Original feature name'] = df_scorecard['Feature name'].str.split(':').str[0]
-        # df_scorecard.groupby('Original feature name')['Coefficients'].min()
-        # min_sum_coef = df_scorecard.groupby('Original feature name')['Coefficients'].min().sum()
-        # df_scorecard.groupby('Original feature name')['Coefficients'].max()
-        # max_sum_coef = df_scorecard.groupby('Original feature name')['Coefficients'].max().sum()
-
-        # In order to create a scorecard, we need to turn the regression coefficients from our PD model into simple scores.
-        # min_score = 300
-        # max_score = 850
-        # df_scorecard['Score - Calculation'] = df_scorecard['Coefficients'] * (max_score - min_score) / (max_sum_coef - min_sum_coef)
-        # df_scorecard['Score - Calculation'][0] = ((df_scorecard['Coefficients'][0] - min_sum_coef) / (max_sum_coef - min_sum_coef)) * (max_score - min_score) + min_score
-        # df_scorecard['Score - Preliminary'] = df_scorecard['Score - Calculation'].round()
-        # df_scorecard['Difference'] = df_scorecard['Score - Preliminary'] - df_scorecard['Score - Calculation']
-        # df_scorecard['Score - Final'] = df_scorecard['Score - Preliminary']
-        # df_scorecard['Score - Final'][77] = 16
-        # There, our scorecard is ready and the score-final column contains the score for each category.
-
-        # According to scorecard we'll add the credit points of each variable.
-        # print(df_scorecard)
-
-        # Calculating credit score
-        # inputs_with_ref_cat_w_intercept = inputs_with_ref_cat
-        # if not 'Intercept' in inputs_with_ref_cat.columns:
-        #     inputs_with_ref_cat_w_intercept.insert(0, 'Intercept', 1)
-        # scorecard_scores = df_scorecard['Score - Final']
-        # scorecard_scores = scorecard_scores.values.reshape(102, 1)
-        # y_scores = inputs_with_ref_cat_w_intercept.dot(scorecard_scores)
-
-        # credit_score = y_scores[0][0]
-        # credit_score = 600
         credit_score = (1-prob_of_default[0])*500 + 350
         print(credit_score)
 
-        # Calculating probability of default from credit score
-
-        # sum_coef_from_score = ((y_scores - min_score) / (max_score - min_score)) * (max_sum_coef - min_sum_coef) + min_sum_coef
-        # y_hat_proba_from_score = np.exp(sum_coef_from_score) / (np.exp(sum_coef_from_score) + 1)
-        
-        # prob_of_default = round(y_hat_proba_from_score[0][0] *100)
-
     return render_template('user_dashboard/home.html', credit_details=credit_details, credit_score=round(credit_score), prob_of_default= round(prob_of_default[0]*100))
-    # return render_template('dashboard_home.html', credit_details=credit_details)
 
 
 @app.route("/user_dashboard_fill_credit_details", methods=['GET','POST'])
@@ -265,7 +149,6 @@ def user_dashboard_fill_credit_details():
     filled_credit_details = False
 
     credit_details=CreditDetails.query.filter_by(user_id=current_user.user_id).first()
-
     if credit_details:
         filled_credit_details=True
         form=CreditDetailsForm(obj=credit_details)   
@@ -304,18 +187,38 @@ def user_dashboard_fill_credit_details():
                 total_acc=form.total_acc.data,
                 total_rev_hi_lim=form.total_rev_hi_lim.data
             )
-                # addr_state= form.addr_state.data,
 
             db.session.add(user_credit_details)
             db.session.commit()
             flash('You have successfully submitted the credit details',category='successful')
         return redirect(url_for('user_dashboard_home'))
     
-    return render_template('user_dashboard/fill_credit_details.html', form=form, credit_details=credit_details,filled_credit_details=filled_credit_details)
-
-
-
-
+    tooltip_info = [
+        'Bank assigned loan grade',
+        'The home ownership status provided by the borrower during registration. Our values are: RENT, OWN, MORTGAGE, OTHER.',
+        'Shows the status of an applicant\'s information, indicating whether or not it has been verified for accuracy by the lender or a third-party source.',
+        'A category provided by the borrower for the loan request. ',
+        'The initial listing status of the loan. If the loan is posted as "fractional" (i.e., "f"), investors can purchase a fraction of the loan. If the loan is posted as "whole" (i.e., "w"), investors must purchase the entire loan amount.',
+        'The number of payments on the loan. Values are in months and can be either 36 or 60.',
+        'Employment length in years. Possible values are between 0 and 10 where 0 means less than one year and 10 means ten or more years. ',
+        'Months since the month when the loan was funded',
+        'Interest Rate on the loan',
+        'Months since the month the borrower\'s earliest reported credit line was opened',
+        'The number of inquiries in past 6 months (excluding auto and mortgage inquiries)',
+        'The number of accounts on which the borrower is now delinquent.',
+        'The self-reported annual income provided by the borrower during registration.',
+        'A ratio calculated using the borrower\'s total monthly debt payments on the total debt obligations, excluding mortgage and the requested Bank loan, divided by the borrower\'s self-reported monthly income.',
+        'The number of months since the borrower\'s last delinquency.',
+        'The number of months since the last public record.',
+        'The monthly payment owed by the borrower if the loan originates.',
+        'The total amount committed to that loan at that point in time.',
+        'The number of 30+ days past-due incidences of delinquency in the borrower\'s credit file for the past 2 years',
+        'The number of open credit lines in the borrower\'s credit file.',
+        'Number of derogatory public records',
+        'The total number of credit lines currently in the borrower\'s credit file',
+        'The maximum amount of credit that a borrower is authorized to use on a revolving credit account, such as a credit card or a line of credit. The "Total Revolving High Credit Limit" is the sum of the credit limits on all of a borrower\'s revolving credit accounts.',
+    ]
+    return render_template('user_dashboard/fill_credit_details.html', form=form, credit_details=credit_details,filled_credit_details=filled_credit_details, tooltip_info=tooltip_info)
 
 
 @app.route("/bank_dashboard_home", methods=['GET','POST'])
@@ -335,10 +238,3 @@ def bank_dashboard_home():
             return render_template('bank_dashboard/home.html', exp_loss=exp_loss, fund_amt=fund_amt, exp_loss_perc=exp_loss_perc, all_charts_data=json.dumps(all_charts_data), all_tables_data=all_tables_data, all_csv_charts_data = json.dumps(all_csv_charts_data))
             
     return render_template('bank_dashboard/home.html')
-
-
-
-@app.route("/bank_dashboard_lgd", methods=['GET','POST'])
-def bank_dashboard_lgd():
-    return render_template('bank_dashboard/lgd.html')
-    

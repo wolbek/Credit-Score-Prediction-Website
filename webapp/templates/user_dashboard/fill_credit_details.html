@@ -28,7 +28,10 @@
                         {% for field in form %}
                             {% if field.id != 'csrf_token' %}
                                 <div class="input-field">
-                                    {{field.label()}}
+                                    <div>
+                                        {{field.label()}} <span class="final__tooltip right" title="{{tooltip_info[loop.index0]}}"><i class="las la-info-circle" ></i></span>
+                                    </div>
+                                    
                                     {{field()}}
                                 </div>
                             {% endif %}
@@ -51,7 +54,9 @@
                         {% for field in form %}
                             {% if field.id != 'csrf_token' %}
                                 <div class="input-field">
-                                    {{field.label()}}
+                                    <div>
+                                        {{field.label()}} <span class="final__tooltip right" title="{{tooltip_info[loop.index0]}}"><i class="las la-info-circle" ></i></span>
+                                    </div>
                                     {{field()}}   
                                 </div>
                             {% endif %}

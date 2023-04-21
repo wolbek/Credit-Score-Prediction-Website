@@ -2,9 +2,9 @@ from ast import Pass
 from tokenize import String
 from xml.dom import ValidationErr
 from flask_wtf import FlaskForm
-from wtforms import StringField,PasswordField,SubmitField, IntegerField, SelectField,FileField
-from wtforms.validators import InputRequired, Email, Length, ValidationError, EqualTo, Regexp
-from webapp.global_constants import grade, home_ownership, verification_status, purpose, initial_list_status
+from wtforms import StringField,PasswordField,SubmitField, IntegerField, SelectField,FileField, FloatField
+from wtforms.validators import InputRequired, Email, Length, ValidationError, EqualTo, Regexp, NumberRange
+from webapp.global_constants import grade, home_ownership, verification_status, purpose, initial_list_status, term
 #  addr_state,term, emp_length, mths_since_issue_d, int_rate, mths_since_earliest_cr_line, inq_last_6mths, acc_now_delinq, annual_inc, dti, mths_since_last_delinq, mths_since_last_record
 from webapp.models import User
 
@@ -33,27 +33,27 @@ class CreditDetailsForm(FlaskForm):
 
     purpose = SelectField(label="Purpose of loan", validators=[InputRequired()], choices=[(op, op) for op in purpose])
     initial_list_status= SelectField(label="Initial list status", validators=[InputRequired()], choices=[(op, op) for op in initial_list_status])
-    term = IntegerField(label="Term of loan", validators=[InputRequired()], render_kw={"placeholder":"5"})
+    term = SelectField(label="Term of loan", validators=[InputRequired()], choices=[(op, op) for op in term], render_kw={"placeholder":"5"})
     
-    emp_length = IntegerField(label="Length of employment", validators=[InputRequired()], render_kw={"placeholder":"5"})
+    emp_length = IntegerField(label="Length of employment", validators=[InputRequired(), NumberRange(min=0, max=10)], render_kw={"placeholder":"5"})
 
     mths_since_issue_d = IntegerField(label="Months since issue date", validators=[InputRequired()], render_kw={"placeholder":"5"})
-    int_rate = IntegerField(label="Interest rate", validators=[InputRequired()], render_kw={"placeholder":"5"})
+    int_rate = FloatField(label="Interest rate", validators=[InputRequired()], render_kw={"placeholder":"5"})
     mths_since_earliest_cr_line = IntegerField(label="Months since earliest credit line", validators=[InputRequired()], render_kw={"placeholder":"5"})
     inq_last_6mths = IntegerField(label="Inquiries in last 6 months", validators=[InputRequired()], render_kw={"placeholder":"5"})
     acc_now_delinq = IntegerField(label="Number of accounts delinquent", validators=[InputRequired()], render_kw={"placeholder":"5"})
-    annual_inc = IntegerField(label="Annual income", validators=[InputRequired()], render_kw={"placeholder":"5000"})
-    dti = IntegerField(label="Debt to income ratio", validators=[InputRequired()], render_kw={"placeholder":"5"})
+    annual_inc = FloatField(label="Annual income", validators=[InputRequired()], render_kw={"placeholder":"5000"})
+    dti = FloatField(label="Debt to income ratio", validators=[InputRequired()], render_kw={"placeholder":"5"})
     mths_since_last_delinq = IntegerField(label="Months since last delinquency", validators=[InputRequired()], render_kw={"placeholder":"5"})
     mths_since_last_record = IntegerField(label="Months since last public record", validators=[InputRequired()], render_kw={"placeholder":"5"})
 
-    installment=IntegerField(label="Installment", validators=[InputRequired()], render_kw={"placeholder":"1000"})
-    funded_amnt=IntegerField(label="Funded Amount", validators=[InputRequired()], render_kw={"placeholder":"500000"})
+    installment=FloatField(label="Installment", validators=[InputRequired()], render_kw={"placeholder":"1000"})
+    funded_amnt=FloatField(label="Funded Amount", validators=[InputRequired()], render_kw={"placeholder":"500000"})
     delinq_2yrs=IntegerField(label="Delinquency in 2 years", validators=[InputRequired()], render_kw={"placeholder":"5"})
     open_acc=IntegerField(label="Accounts Open", validators=[InputRequired()], render_kw={"placeholder":"5"})
     pub_rec=IntegerField(label="Public Records count", validators=[InputRequired()], render_kw={"placeholder":"5"})
     total_acc=IntegerField(label="Total Accounts", validators=[InputRequired()], render_kw={"placeholder":"5"})
-    total_rev_hi_lim=IntegerField(label="Total Revolving High Credit Limit", validators=[InputRequired()], render_kw={"placeholder":"5"})
+    total_rev_hi_lim=FloatField(label="Total Revolving High Credit Limit", validators=[InputRequired()], render_kw={"placeholder":"500000"})
 
     # term = SelectField(label="Term of loan", validators=[InputRequired()], choices=[(op, op) for op in term])
 
