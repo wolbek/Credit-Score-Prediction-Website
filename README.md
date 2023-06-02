@@ -11,7 +11,7 @@
 
 ### Make an "uploads" folder and put those materials there
 
-### Download below csv files to put them as example input in bank's side
+### Download below csv files to put them as an example input in bank's side
 ```Train.csv``` https://drive.google.com/file/d/1MXHtDci1OUuvXNWBFLPM4ZXpEKMfpmhl/view?usp=sharing
 ```Test.csv``` https://drive.google.com/file/d/1iZhAaHe-toj8zF1vlxzBd0LjwBNi2J6v/view?usp=sharing
 
